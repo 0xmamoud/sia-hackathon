@@ -8,8 +8,8 @@ import { Separator } from '@/components/ui/separator'
 export function Hero() {
   return (
     <section
-      className="max-container padding-x margin-top font-inter flex 
-        justify-between items-stretch gap-7"
+      className="padding-x margin-top font-inter flex 
+        justify-between items-stretch gap-8"
     >
       <div className="flex-1 flex flex-col justify-between gap-8 lg:py-8">
         <h1 className="font-lora font-medium text-4xl max-md:text-2xl leading-snug">

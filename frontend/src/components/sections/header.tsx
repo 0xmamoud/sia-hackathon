@@ -8,8 +8,7 @@ import Link from "next/link"
 export function Header() {
   return (
     <header
-      className="font-inter font-medium mt-4 max-container 
-        w-[95%] flex justify-between items-center p-4 max-md:p-2 "
+      className="font-inter font-medium mt-4 flex justify-between items-center p-4 max-md:p-2 "
     >
       <Link href="/">
         <Image
