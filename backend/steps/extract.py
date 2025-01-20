@@ -13,7 +13,6 @@ client_openai = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),  # This is the default and can be omitted
 )
 
-
 CASE_PROMPT_PATH = os.getenv("CASE_PROMPT_PATH")
 
 class Extract(Step):

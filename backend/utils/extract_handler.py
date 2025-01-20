@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import List
 import json
-from chardet.universaldetector import UniversalDetector
 
 class ExtractHandler:
     
@@ -39,9 +38,7 @@ class ExtractHandler:
                 ],
                 response_format=self.config["struct_output"][self.step],
             )
-            # models = client_openai.models.list()
-            # print(models)
-
+           
         except Exception as e:
             raise RuntimeError(f"Erreur lors du call API: {e}")
-        # return completion.choices[0].message.parsed
+        return completion.choices[0].message.parsed
