@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Dict, Any
 from docling.document_converter import DocumentConverter
 from runner import Step
-from docling.document_converter import DocumentConverter
 
 
 class ReadAndConvert(Step):
@@ -30,11 +29,11 @@ class ReadAndConvert(Step):
                 converter = DocumentConverter()
                 result = converter.convert(str(file_path))
 
-                output_name = f"{file_path.stem}.json"
+                output_name = f"{file_path.stem}.md"
                 output_path = path / output_name
-                with open(output_path, "w", encoding="utf-8") as json_file:
-                    json_file.write(result.document.export_to_markdown())
-                
+                with open(output_path, "w", encoding="utf-8") as md_file:
+                    md_file.write(result.document.export_to_markdown())
+                    
                 results[name] = str(output_path)
                 print(f"Fichier converti et sauvegardé : {output_path}")
 

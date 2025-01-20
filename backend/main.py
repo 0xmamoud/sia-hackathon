@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from utils.output_model_class import InformationsStandard
 from runner import Runner
 from steps.read_and_convert import ReadAndConvert
+from steps.extract import Extract
 
 load_dotenv()
 
@@ -24,11 +25,19 @@ if __name__ == "__main__":
         "struct_output": output_struct_dict,
     }
     
-    runner.add(ReadAndConvert(description="Read files and convert them into PDF"))
+    # runner.add(ReadAndConvert(description="Read files and convert them into PDF"))
+    runner.add(Extract(config=llm_config, description="Extract information from documents"))
 
+    # result = runner.run(
+    #     initial_input={
+    #         "path": "data/baux",
+    #         "name": "bail_1.pdf",
+    #     },
+    # )
+    
     result = runner.run(
         initial_input={
-            "path": "data/baux",
-            "name": "bail_1.pdf",
+            "converted_files": {"bail_1": "data/baux/bail_1.md"},
         },
     )
+    
