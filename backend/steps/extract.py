@@ -7,6 +7,8 @@ from prompts import load_config
 from runner import Step
 from openai import OpenAI
 from utils.extract_handler import ExtractHandler
+import json
+from pathlib import Path
 
 
 client_openai = OpenAI(
@@ -37,10 +39,24 @@ class Extract(Step):
         self.validate_input(input_data)
         
         results = {}
-        for json_file in input_data["converted_files"].values():
+        for original_path, json_file in input_data["converted_files"].items():
             try:
                 result = self.process_document(json_file, self.system_prompt, self.config, client_openai)
                 results[json_file] = result
-                print(f"Processed {json_file}: {result}")
+                print(f"Processed {json_file}: {result}\n\nTYPE: {type(result)}")
+
+                result_dict = result.dict()
+                
+                output_dir = Path("data/informations_baux_processed")
+                output_dir.mkdir(parents=True, exist_ok=True)
+
+                original_file = Path(original_path)
+                output_file = output_dir / f"{original_file.stem}_informations.json"
+
+                with open(output_file, "w", encoding="utf-8") as output:
+                    json.dump(result_dict, output, ensure_ascii=False, indent=2)
+                print(f"Saved extracted information to: {output_file}")
+            
             except RuntimeError as e:
                 print(e)
+        return {"extracted informations": result}
