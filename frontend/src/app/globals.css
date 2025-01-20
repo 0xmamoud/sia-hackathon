@@ -49,3 +49,44 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .max-container {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+}
+
+@layer utilities {
+  .margin {
+    @apply m-16 max-md:m-8;
+  }
+
+  .margin-x {
+    @apply mx-16 max-md:mx-8;
+  }
+
+  .margin-top {
+    @apply mt-16 max-md:mt-8;
+  }
+
+  .margin-bottom {
+    @apply mb-16 max-md:mb-8;
+  }
+
+  .padding {
+    @apply p-12 max-md:p-6;
+  }
+
+  .padding-x {
+    @apply px-12 max-md:px-6;
+  }
+
+  .padding-top {
+    @apply pt-12 max-md:pt-6;
+  }
+
+  .padding-bottom {
+    @apply pb-12 max-md:pb-6;
+  }
+}
