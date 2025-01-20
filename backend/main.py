@@ -25,19 +25,19 @@ if __name__ == "__main__":
         "struct_output": output_struct_dict,
     }
     
-    # runner.add(ReadAndConvert(description="Read files and convert them into PDF"))
+    runner.add(ReadAndConvert(description="Read files and convert them into PDF"))
     runner.add(Extract(config=llm_config, description="Extract information from documents"))
 
-    # result = runner.run(
-    #     initial_input={
-    #         "path": "data/baux",
-    #         "name": "bail_1.pdf",
-    #     },
-    # )
-    
     result = runner.run(
         initial_input={
-            "converted_files": {"bail_1": "data/baux/bail_1.md"},
+            "path": "data/baux",
+            "name": "bail_1.pdf",
         },
     )
+    
+    # result = runner.run(
+    #     initial_input={
+    #         "converted_files": {"bail_1": "data/baux/bail_1.md"},
+    #     },
+    # )
     
