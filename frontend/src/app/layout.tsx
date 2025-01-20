@@ -33,9 +33,6 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${lora.variable} antialiased bg-background`}
       >
-        <div className="max-container">
-          <Header />
-        </div>
         {children}
       </body>
     </html>

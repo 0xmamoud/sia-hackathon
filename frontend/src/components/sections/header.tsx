@@ -8,15 +8,17 @@ import Link from "next/link"
 export function Header() {
   return (
     <header
-      className="font-inter font-medium bg-light mt-4 max-container 
-        w-[95%] flex justify-between items-center p-4 max-md:p-2 rounded-3xl md:rounded-full"
+      className="font-inter font-medium mt-4 max-container 
+        w-[95%] flex justify-between items-center p-4 max-md:p-2 "
     >
-      <Image
-        src="/logo.svg"
-        alt="Logo"
-        width={50}
-        height={50}
-      />
+      <Link href="/">
+        <Image
+          src="/logo.svg"
+          alt="Logo"
+          width={50}
+          height={50}
+        />
+      </Link>
       <nav className="max-md:hidden ">
         <ul className="flex justify-evenly items-center gap-4 ">
           {navLinks.map((link) => (
