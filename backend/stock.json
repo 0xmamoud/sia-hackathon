@@ -1,0 +1,19 @@
+[
+  {
+    index: 0,
+    message: {
+      role: "assistant",
+      content: "{\n  \"A1\": \"172 re Raimon de Trencavel Le Clos des Muses CS 40066 34075 MONTPELLIER CEDEX 3\",\n  \"B1\": \"Laélé\",\n  \"C1\": \"EL, société immatriculée au RCS de Montpellier sous le numéro 535 302 525\",\n  \"D1\": \"01/10/2016\",\n  \"E1\": \"30/06/2025\"\n}",
+      refusal: null,
+    },
+    logprobs: null,
+    finish_reason: "stop",
+  }
+]
+{
+  "A1": "172 re Raimon de Trencavel Le Clos des Muses CS 40066 34075 MONTPELLIER CEDEX 3",
+  "B1": "Laélé",
+  "C1": "EL, société immatriculée au RCS de Montpellier sous le numéro 535 302 525",
+  "D1": "01/10/2016",
+  "E1": "30/06/2025"
+}
