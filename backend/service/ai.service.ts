@@ -1,6 +1,7 @@
 import { ExcelsService } from "./excels.service";
 import {PDFService} from "./pdf.service";
 import OpenAI from 'openai';
+import { PrismaClient } from '@prisma/client';
 
 enum Status {
     PENDING = 'PENDING',
@@ -14,6 +15,7 @@ const openai = new OpenAI({
 });
 
 export class AIProcessService {
+    private prisma: PrismaClient;
     private excelsService: ExcelsService;
     private pdfService: PDFService;
 
@@ -26,6 +28,7 @@ export class AIProcessService {
     private processExcels: any;
     
     constructor(auditTemplatePath: string, excelsTemplatePath: string, leasesPath: string[]) {
+        this.prisma = new PrismaClient();
         this.excelsService = new ExcelsService();
         this.pdfService = new PDFService();
 
@@ -85,6 +88,60 @@ export class AIProcessService {
         return response;
     }
 
+    private async storeResultsExcel(fileId: string, datasourceExcel: any) {
+        try {
+            await this.prisma.result.create({
+                data: {
+                    fileId,
+                    datasourceExcel,
+                },
+            });
+
+            console.log('Excel results stored successfully');
+        } catch (error) {
+            console.error('Error storing Excel results:', error);
+        }
+    }
+
+    private async storeResultsAudit(fileId: string, datasourceAudit: any) {
+        try {
+            const updatedResult = await this.prisma.result.update({
+                where: { fileId },
+                data: {
+                    datasourceAudit,
+                },
+            });
+
+            console.log('Audit results updated successfully:', updatedResult);
+        } catch (error) {
+            console.error('Error updating Audit results:', error);
+
+            // Handle case where record does not exist
+            if (error.code === 'P2025') {
+                console.error(`Record with fileId ${fileId} not found.`);
+            }
+        }
+    }
+
+    private async storeResume(fileId: string, docResume: string) {
+        try {
+            const updatedResult = await this.prisma.result.update({
+                where: { fileId },
+                data: {
+                    docResume,
+                },
+            });
+
+            console.log('Audit results updated successfully:', updatedResult);
+        } catch (error) {
+            console.error('Error updating Audit results:', error);
+
+            if (error.code === 'P2025') {
+                console.error(`Record with fileId ${fileId} not found.`);
+            }
+        }
+    }
+
     private async leaseGetExcels(index: number, lease: string, excelsScan: any) {
         const message = [
             {
@@ -114,6 +171,8 @@ export class AIProcessService {
 
         const response = await this.callToAgent(message) as any;
 
+        await this.storeResultsExcel(this.ID, response);
+
         const sheetValues = Object.keys(response).map(key => ({
             label: key[0],
             index: `${key[0]}${parseInt(key.slice(1)) + index}`,
@@ -124,11 +183,48 @@ export class AIProcessService {
         this.processExcels.push();
     }
 
+    private async generateDocumentResume(documentContent: string): Promise<string> {
+        const message = [
+            {
+                role: 'system',
+                content: "Vous êtes un expert en analyse de documents commerciaux. Votre tâche consiste à analyser un document fourni et à générer un résumé clair et concis de son contenu.\n" +
+                    "\n" +
+                    "OBJECTIFS DU RÉSUMÉ :\n" +
+                    "- Identifier les points clés pertinents du document.\n" +
+                    "- Expliquer brièvement les informations essentielles comme les parties impliquées, les dates importantes, les clauses principales, etc.\n" +
+                    "- Exclure tout texte ou information redondante.\n" +
+                    "\n" +
+                    "RÈGLES DE RÉSUMÉ :\n" +
+                    "- Rédiger en français avec des phrases complètes.\n" +
+                    "- Ne pas dépasser 200 mots.\n" +
+                    "- Assurez-vous que toutes les informations mentionnées soient exactes et pertinentes.\n" +
+                    "\n" +
+                    "FORMAT DE RÉPONSE REQUIS :\n" +
+                    "- Un résumé sous forme de texte clair et structuré."
+            },
+            {
+                role: 'user',
+                content: documentContent
+            }
+        ] as { role: 'system' | 'user', content: string }[];
+    
+        const response = await this.callToAgent(message) as any;
+    
+        if (!response) {
+            throw new Error('No response received while generating the document summary.');
+        }
+
+        await this.storeResume(this.ID, response);
+    
+        return response as string;
+    }
+
     private async scanLease(leasePath: string, auditScan: string[], excelsScan: any){
         const leasePDFtoMD = await this.pdfService.toMd(leasePath);
 
         await this.leaseGetExcels((this.leasesPath.indexOf(leasePath) + 1), leasePDFtoMD, excelsScan);
         //ici await pour l'audit du pdf
+        //ici await pour le resume 
     }
 
     public async start() {
@@ -140,7 +236,7 @@ export class AIProcessService {
         }
 
         await this.excelsService.writeExcel(this.processExcels, this.excelsTemplatePath, `output/lease_excel/${this.ID}.xlsx`);
-
+        await this.prisma.$disconnect();
         console.log(this.processExcels);
     }
 }
