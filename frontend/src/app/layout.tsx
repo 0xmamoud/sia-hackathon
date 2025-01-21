@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Lora } from "next/font/google";
-import { Header } from "@/components/sections/header";
+import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,7 +30,7 @@ export default function RootLayout({
         <link rel="icon" href="/logo.svg" />
       </head>
       <body
-        className={`${inter.variable} ${lora.variable} antialiased bg-background`}
+        className={`${inter.variable} ${lora.variable} antialiased bg-background font-inter`}
       >
         {children}
       </body>
