@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react'
 
 export function Contact() {
   return (
-    <section className='container margin-y padding'>
+    <section className='container margin-y padding' id='contact'>
       <h2 className='text-4xl font-medium text-center font-lora margin-bottom'>Get in touch</h2>
       <div className='flex justify-evenly items-center flex-wrap max-md:flex-col gap-8 w-full' >
         {contactData.map((contact) =>

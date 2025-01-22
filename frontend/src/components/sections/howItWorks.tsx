@@ -7,6 +7,7 @@ export function HowItWorks() {
     <section
       className='container mx-auto margin-y padding bg-gradient-to-b 
         from-transparent to-light overflow-hidden rounded-3xl max-xl:w-[95%] '
+      id='how-it-works'
     >
       <h2 className='text-4xl font-medium text-center font-lora margin-bottom'>How it works</h2>
       <div className='grid grid-cols-1 gap-8'>

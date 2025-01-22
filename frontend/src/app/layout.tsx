@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Lora } from "next/font/google";
+import { Footer } from "@/components/sections/footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${inter.variable} ${lora.variable} antialiased bg-background font-inter`}
       >
         {children}
+        <Footer />
       </body>
     </html>
   );
