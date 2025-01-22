@@ -1,6 +1,8 @@
 import React from 'react'
 import Image from 'next/image'
 import { processData } from '@/lib/constants'
+import * as motion from 'motion/react-client'
+import { TextAnimate } from '@/components/ui/text-animate'
 
 export function HowItWorks() {
   return (
@@ -9,10 +11,24 @@ export function HowItWorks() {
         from-transparent to-light overflow-hidden rounded-3xl max-xl:w-[95%] '
       id='how-it-works'
     >
-      <h2 className='text-4xl font-medium text-center font-lora margin-bottom'>How it works</h2>
-      <div className='grid grid-cols-1 gap-8'>
+      <TextAnimate
+        animation="blurInUp"
+        by="character"
+        className='text-4xl font-medium text-center font-lora margin-bottom'>
+        How it works
+      </TextAnimate>
+      <motion.div
+
+        className='grid grid-cols-1 gap-8'>
         {processData.map((card) => (
-          <div key={card.title} className='flex justify-between items-center gap-8 max-md:flex-col'>
+          <motion.div
+            whileInView={{ scale: 1 }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            key={card.title} className='flex justify-between items-center gap-8 max-md:flex-col'
+          >
+
             <div className='flex flex-col gap-4'>
               <h2 className='text-2xl font-medium'>{card.title}</h2>
               <p className='text-lg'>{card.description}</p>
@@ -36,9 +52,9 @@ export function HowItWorks() {
                 className="rounded-3xl object-cover max-w-[500px] w-full max-h-[300px]"
               />
             )}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   )
 }
