@@ -5,10 +5,10 @@ import { Contact } from '@/components/sections/contact'
 
 export default function Home() {
   return (
-    <section className='container'>
+    <section>
       <div
-        className="bg-gradient-to-b from-light to-background 
-           rounded-3xl md:rounded-[40px] h-full max-xl:w-[95%] mx-auto">
+        className="container bg-gradient-to-b from-light to-background 
+           rounded-3xl md:rounded-[40px] h-full max-xl:w-[95%] mx-auto mt-4 ">
         <Header />
         <Hero />
       </div>
