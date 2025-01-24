@@ -133,7 +133,7 @@ router.post('/get_loans_db', async (ctx) => {
                 leaseName: true, 
             },
         });
-
+        console.log(leaseNames)
         ctx.body = {
             success: true,
             data: leaseNames.map((lease) => lease.leaseName),
@@ -149,52 +149,59 @@ router.post('/get_loans_db', async (ctx) => {
     }
 });
 
-router.post('/get_loan_details', async (ctx) => {
-    try {
-        const { id } = ctx.request.body;
+router.get('/get_loan_details_by_name/:name', async (ctx) => {
+  try {
+      const { name } = ctx.params;
 
-        if (!id) {
-            ctx.status = 400;
-            ctx.body = {
-                success: false,
-                message: 'Loan ID is required',
-            };
-            return;
-        }
+      if (!name) {
+          ctx.status = 400;
+          ctx.body = {
+              success: false,
+              message: 'Lease name is required',
+          };
+          return;
+      }
 
-        const loanDetails = await prisma.lease.findUnique({
-            where: {
-                id: parseInt(id, 10),
-            },
-            select: {
-                datasourceAudit: true,
-                datasourceExcel: true,
-            },
-        });
+      const loans = await prisma.lease.findMany({
+          where: {
+              leaseName: name,
+          },
+          orderBy: {
+              leaseName: 'asc',
+          },
+          select: {
+              datasourceAudit: true,
+              datasourceExcel: true,
+          },
+      });
 
-        if (!loanDetails) {
-            ctx.status = 404;
-            ctx.body = {
-                success: false,
-                message: 'Loan not found',
-            };
-            return;
-        }
+      if (loans.length === 0) {
+          ctx.status = 404;
+          ctx.body = {
+              success: false,
+              message: 'No loans found with the given name',
+          };
+          return;
+      }
 
-        ctx.body = {
-            success: true,
-            data: loanDetails,
-        };
-    } catch (error) {
-        console.error('Error fetching loan details:', error);
-        ctx.status = 500;
-        ctx.body = {
-            success: false,
-            message: 'Failed to fetch loan details',
-            error: error.message,
-        };
-    }
+      ctx.body = {
+          success: true,
+          data: {
+              leaseName: name,
+              details: loans,
+          },
+      };
+  } catch (error) {
+      console.error('Error fetching loan details by name:', error);
+      ctx.status = 500;
+      ctx.body = {
+          success: false,
+          message: 'Failed to fetch loan details by name',
+          error: error.message,
+      };
+  }
 });
+
 
 app.use(router.routes());
 app.use(router.allowedMethods());
