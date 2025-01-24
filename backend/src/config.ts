@@ -1608,7 +1608,7 @@ export interface ExcelCase {
 
 export const excelCase: ExcelCase[] = [
     {
-        prompt: "Specialiste dans la détection des parties engagées dans un document de type bail immobilier, vous devez analyser un bail immobilier pour identifier et extraire les informations suivantes (si certaines informations sont absentes ou incomplètes, précisez-le également). : ",
+        prompt: "Specialiste dans l'analyse de dossier de bail immobilier, vous devez lire attentivement le document suivant pour identifier et extraire les informations suivantes relatives aux informations générales, aux durées, aux loyers et garanties et à l'indexation (si certaines informations sont absentes ou incomplètes, précisez-le également) : ",
         cases: [
             {
                 column: "B",
@@ -1646,7 +1646,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Le/les activité(s) autorisée(s)", //x
                 page: 0
             },
-            //DURÉE
             {
                 column: "H",
                 index: 2,
@@ -1677,8 +1676,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Prochaine faculté de sortie du preneur du bail",
                 page: 0
             },
-            //LOYER ET GARANTIES
-
             {
                 column: "M",
                 index: 2,
@@ -1721,7 +1718,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Garanties locatives fournies en DR du bail",
                 page: 0
             },
-            //indexation
             {
                 column: "T",
                 index: 2,
@@ -1759,11 +1755,9 @@ export const excelCase: ExcelCase[] = [
             },
         ]
     },
-    //PAGE Refacturation des charges
     {
-        prompt: "Le prompt",
+        prompt: "Spécialiste dans l'analyse de dossier de bail immobilier, vous devez lire attentivement le document suivant pour identifier et extraire les informations suivantes relatives à la refacturation des charges (si certaines informations sont absentes ou incomplètes, précisez-le également) : ",
         cases: [
-            //INFORMATION GÉNÉRALE
             {
                 column: "B",
                 index: 2,
@@ -1776,7 +1770,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Le nom du Preneur", //x
                 page: 1,
             },
-            //REPARTITION DES CHARGES
             {
                 column: "D",
                 index: 2,
@@ -1861,7 +1854,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Clauses spécifiques (franchise, plafond, forfait de charges)",
                 page: 1,
             },
-            //PRISE EN CHARGE DES TRAVAUX
             {
                 column: "R",
                 index: 2,
@@ -1914,7 +1906,7 @@ export const excelCase: ExcelCase[] = [
     },
     // Page Divers
     {
-        prompt: "Le prompt",
+        prompt: "Spécialiste dans l'analyse de dossier de bail immobilier, vous devez lire attentivement le document suivant pour identifier et extraire les informations suivantes relatives à la sous-location / cession, la restitution des locaux, au droit contractuel et clause de non concurrence, à l'environnement, la clause résolutoire (si certaines informations sont absentes ou incomplètes, précisez-le également) : ",
         cases: [
             {
                 column: "B",
@@ -1947,7 +1939,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Cession du fonds de commerce + garanties", //x
                 page: 2,
             },
-            //RESTITUTION DES LOCAUX
             {
                 column: "G",
                 index: 2,
@@ -1972,7 +1963,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Etat des lieux fourni en Document Référentiel", //x
                 page: 2,
             },
-            //DIVERS
             {
                 column: "K",
                 index: 2,
@@ -1985,7 +1975,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Clause de non concurrence pesant sur le Bailleur", //x
                 page: 2,
             },
-            //ENVIRONNEMENT
             {
                 column: "M",
                 index: 2,
@@ -2018,7 +2007,6 @@ export const excelCase: ExcelCase[] = [
             },       
         ]
     }, 
-    //CLAUSE RESOLUTOIRE
     {
         prompt: "Le prompt",
         cases: [

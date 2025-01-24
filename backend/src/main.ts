@@ -202,6 +202,59 @@ router.get('/get_loan_details_by_name/:name', async (ctx) => {
   }
 });
 
+router.delete('/delete_lease/:id', async (ctx) => {
+  try {
+      const { id } = ctx.params;
+      if (!id) {
+          ctx.status = 400;
+          ctx.body = {
+              success: false,
+              message: 'Lease ID is required',
+          };
+          return;
+      }
+
+      const parsedId = parseInt(id, 10);
+        if (isNaN(parsedId)) {
+            ctx.status = 400;
+            ctx.body = {
+                success: false,
+                message: 'Invalid Lease ID format',
+            };
+            return;
+        }
+      
+      const deletedLease = await prisma.lease.delete({
+          where: {
+              id: parsedId, // Use the parsed integer ID
+          },
+      });
+      ctx.body = {
+          success: true,
+          message: 'Lease deleted successfully',
+          data: deletedLease,
+      };
+  } catch (error) {
+      console.error('Error deleting lease:', error);
+
+      if (error.code === 'P2025') {
+          ctx.status = 404;
+          ctx.body = {
+              success: false,
+              message: 'Lease not found',
+          };
+      } else {
+          ctx.status = 500;
+          ctx.body = {
+              success: false,
+              message: 'Failed to delete lease',
+              error: error.message,
+          };
+      }
+  }
+});
+
+
 
 app.use(router.routes());
 app.use(router.allowedMethods());
