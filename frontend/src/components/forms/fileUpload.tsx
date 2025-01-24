@@ -59,7 +59,7 @@ export function FileUploader() {
       const uploadInterval = setInterval(() => {
         setFiles(prevFiles => prevFiles.map((f) => {
           if (f.file.name === fileObj.file.name) {
-            const newProgress = f.progress + 20;
+            const newProgress = f.progress + Math.floor(Math.random() * 40);
             if (newProgress >= 100) {
               clearInterval(uploadInterval);
               return { ...f, progress: 100, status: 'completed' };
