@@ -2,6 +2,7 @@
 "use client"
 import React, { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { Upload, File, X } from 'lucide-react';
+import { Button } from '@/components/ui/button'
 
 interface FileWithProgress {
   file: File;
@@ -58,7 +59,7 @@ export function FileUploader() {
       const uploadInterval = setInterval(() => {
         setFiles(prevFiles => prevFiles.map((f) => {
           if (f.file.name === fileObj.file.name) {
-            const newProgress = f.progress + 10;
+            const newProgress = f.progress + 20;
             if (newProgress >= 100) {
               clearInterval(uploadInterval);
               return { ...f, progress: 100, status: 'completed' };
@@ -86,52 +87,69 @@ export function FileUploader() {
     URL.revokeObjectURL(url);
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    console.log('Files uploaded:', files);
+  };
+
   return (
     <section className="max-w-md margin-y mx-auto p-6 bg-white rounded-lg shadow-md">
       <form
         onDragEnter={handleDrag}
-        onSubmit={(e) => e.preventDefault()}
-        className={`relative transition-all p-4 border-2 border-dashed rounded-lg 
-            duration-300 ${dragActive ? 'border-blue-500 bg-blue-50'
-            :
-            'border-gray-300 bg-gray-50'
-          }`}
+        onSubmit={handleSubmit}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          className="hidden"
-          multiple
-          onChange={handleChange}
-          accept=".pdf,.doc,.docx,.txt"
-        />
-        <div className="text-center py-6">
-          <div className="flex justify-center mb-4">
-            <Upload className="text-gray-400" size={48} />
+        <div
+          className={`relative transition-all p-4 border-2 border-dashed rounded-lg 
+            duration-300 ${dragActive ? 'border-blue-500 bg-blue-50'
+              :
+              'border-gray-300 bg-gray-50'
+            }`}
+        >
+
+          <input
+            ref={inputRef}
+            type="file"
+            className="hidden"
+            multiple
+            onChange={handleChange}
+            accept=".pdf,.doc,.docx,.txt"
+          />
+          <div className="text-center py-6">
+            <div className="flex justify-center mb-4">
+              <Upload className="text-gray-400" size={48} />
+            </div>
+            <p className="text-gray-600 mb-4">
+              Drag and drop your files here or
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="ml-2 text-blue-600 hover:underline"
+              >
+                Browse
+              </button>
+            </p>
+            <p className="text-xs text-gray-500">
+              Supported formats: PDF, DOC, DOCX, TXT
+            </p>
+
           </div>
-          <p className="text-gray-600 mb-4">
-            Drag and drop your files here or
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="ml-2 text-blue-600 hover:underline"
-            >
-              Browse
-            </button>
-          </p>
-          <p className="text-xs text-gray-500">
-            Supported formats: PDF, DOC, DOCX, TXT
-          </p>
+          {dragActive && (
+            <div
+              className="absolute inset-0 z-10"
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            ></div>
+          )}
+
         </div>
-        {dragActive && (
-          <div
-            className="absolute inset-0 z-10"
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          ></div>
-        )}
+        <Button
+          className="mt-4 inline-block w-full"
+          disabled={files.length === 0}
+          type="submit"
+
+        >Upload</Button>
       </form>
 
       {files.length > 0 && (
@@ -154,7 +172,7 @@ export function FileUploader() {
 
               <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                 <div
-                  className="bg-blue-600 h-2.5 rounded-full"
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${fileObj.progress}%` }}
                 ></div>
               </div>

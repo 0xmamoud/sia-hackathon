@@ -1,6 +1,7 @@
 import React from 'react'
 import { Header } from '@/components/sections/header'
 import { FileUploader } from '@/components/forms/fileUpload'
+import { RecentUpload } from '@/components/sections/recentUpload'
 
 export default function Dashboard() {
   return (
@@ -11,7 +12,16 @@ export default function Dashboard() {
       >
         <Header />
       </div>
-      <FileUploader />
+      <div className='container'>
+        <h1 className='text-4xl font-medium text-center font-lora margin-top'>
+          Welcome back to your dashboard
+        </h1>
+        <p className='text-center text-lg opacity-55 mt-4'>
+          Here you can upload and keep track of your files
+        </p>
+        <FileUploader />
+      </div>
+      <RecentUpload />
     </section>
   )
 }
