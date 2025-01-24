@@ -1,0 +1,17 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model lease {
+  id                 Int      @id @default(autoincrement())
+  processId          String
+  datasourceAudit    Json?
+  datasourceExcel    Json?
+  docResume          String?
+  docAlert           Json?
+}

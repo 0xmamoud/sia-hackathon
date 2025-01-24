@@ -1,4 +1,6 @@
 import * as XLSX from 'xlsx';
+import { Case } from '../config';
+import ExcelJS from "exceljs";
 
 const getKeysForFirstRow = (sheet) => {
     return Object.keys(sheet).filter(key => {
@@ -9,7 +11,7 @@ const getKeysForFirstRow = (sheet) => {
 interface IExcelCategory {
     index: string
     label: string
-    sheetName: string
+    page: number
     value: string
 }
 
@@ -29,7 +31,7 @@ export class ExcelsService {
 
         for (let sheetName in workbook.Sheets) {
             const workSheet = workbook.Sheets[sheetName];
-
+            
             const firstRow = getKeysForFirstRow(workSheet);
 
             if (firstRow.length === 0)
@@ -46,50 +48,41 @@ export class ExcelsService {
         return result;
     }
 
-    createPromptElement(data: IExcelSheet) {
+    createPromptElement(data: Case[]) {
         if (!data)
             throw new Error("Error with the data")
 
-        const elements = [];
+        const elements = [] as string[];
 
-        for (let excel in Object.keys(data)) {
-            const sheet = data[excel];
-            let element = sheet.map((category) =>
-            `- ${category.index}: ${category.value} extraite`
+        let element = data.map((category) =>
+            `- ${category.page}${category.column}${category.index}: ${category.name}`
             ).join("\n");
 
-            elements.push(element)
-        }
+        elements.push(element)
 
         return elements.join("\n \n");
     }
 
     async writeExcel(data: IExcelCategory[], path: string, resultPath: string) {
         try {
-            const workbook = XLSX.readFile(path);
-            if (!workbook) {
-                throw new Error("Error with the file");
-            }
-
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(path);
+    
             for (const item of data) {
-                const sheetName = item.sheetName;
-                const workSheet = workbook.Sheets[sheetName];
-
-                if (!workSheet) {
-                    console.error(`La feuille ${sheetName} n'existe pas.`);
+                const sheet = workbook.getWorksheet(workbook.worksheets.map(sheet => sheet.name)[item.page]); // Les index des feuilles commencent à 1 dans ExcelJS
+                if (!sheet) {
+                    console.error(`La feuille d'index ${item.page} n'existe pas.`);
                     continue;
                 }
-
-                console.log(`Avant modification: `, workSheet[item.index]);
-
-                XLSX.utils.sheet_add_aoa(workSheet, [[item.value]], {
-                    origin: item.index
-                });
-
-                console.log(`Cellule ${item.index} dans la feuille ${sheetName} modifiée avec ${item.value}`);
+    
+                const cell = sheet.getCell(item.index);
+    
+                cell.value = item.value;
             }
-
-            XLSX.writeFile(workbook, resultPath);
+    
+            // Enregistrer les modifications dans le fichier de destination
+            await workbook.xlsx.writeFile(resultPath);
+            console.log(`Fichier Excel modifié enregistré à ${resultPath}`);
         } catch (error) {
             console.error("Erreur lors de la modification du fichier Excel:", error);
             throw error;
