@@ -16,4 +16,6 @@ model lease {
   datasourceExcel    Json?
   docResume          String?
   docAlert           Json?
+  templateAuditPath  String
+  templateExcelPath  String
 }
