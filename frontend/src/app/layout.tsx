@@ -33,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${lora.variable} antialiased bg-background font-inter`}
       >
+
         {children}
         <Footer />
       </body>

@@ -3,13 +3,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { CustomSeparator } from '@/components/ui/customSeparator'
 import { BoxReveal } from '@/components/ui/box-reveal'
 
 export function Hero() {
   return (
     <section
-      className="padding-x margin-top font-inter flex 
+      className="container padding-x margin-top font-inter flex 
         justify-between items-stretch gap-8"
     >
 
@@ -43,7 +43,7 @@ export function Hero() {
             </Link>
           </Button>
         </div>
-        <Separator />
+        <CustomSeparator />
         <p className="text-slate-500  text-xs md:text-lg">
           An AI-powered platform designed to simplify and optimize commercial
           lease audits with precision and efficiency.

@@ -1,7 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
-import { Separator } from '@/components/ui/separator'
+import { CustomSeparator } from '@/components/ui/customSeparator'
 
 export function Footer() {
   return (
@@ -20,7 +20,7 @@ export function Footer() {
         </div>
       </section >
       <div className='margin-top'>
-        <Separator />
+        <CustomSeparator />
         <p className='text-center text-xs md:text-lg opacity-55 mt-4'>© 2025 LEAZ. All rights reserved.</p>
       </div>
     </>

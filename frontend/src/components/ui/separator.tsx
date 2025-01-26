@@ -1,22 +1,31 @@
-import React from 'react'
-import { cn } from "@/lib/utils";
+"use client"
 
+import * as React from "react"
+import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
-export function Separator({ className }: { className?: string }) {
-  return (
-    <div className="relative w-[80%] h-[1px] mx-auto">
-      <div className={cn(
-        "absolute w-full h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent",
+import { cn } from "@/lib/utils"
+
+const Separator = React.forwardRef<
+  React.ElementRef<typeof SeparatorPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+>(
+  (
+    { className, orientation = "horizontal", decorative = true, ...props },
+    ref
+  ) => (
+    <SeparatorPrimitive.Root
+      ref={ref}
+      decorative={decorative}
+      orientation={orientation}
+      className={cn(
+        "shrink-0 bg-border",
+        orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
         className
-      )} />
-      <div
-        className="absolute w-full h-[1px] bg-gradient-to-r 
-          from-transparent via-primary/20 to-transparent transform -skew-x-12 blur-[0.5px]"
-      />
-      <div
-        className="absolute w-1/2 h-[1px] left-1/4 bg-gradient-to-r 
-          from-transparent via-primary/10 to-transparent animate-pulse" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
-    </div>
-  );
-}
+      )}
+      {...props}
+    />
+  )
+)
+Separator.displayName = SeparatorPrimitive.Root.displayName
+
+export { Separator }

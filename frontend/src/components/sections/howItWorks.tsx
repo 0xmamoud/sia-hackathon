@@ -7,8 +7,8 @@ import { TextAnimate } from '@/components/ui/text-animate'
 export function HowItWorks() {
   return (
     <section
-      className='container mx-auto margin-y padding bg-gradient-to-b 
-        from-transparent to-light overflow-hidden rounded-3xl max-xl:w-[95%] '
+      className='container mx-auto margin-y padding  
+         overflow-hidden rounded-3xl max-xl:w-[95%] '
       id='how-it-works'
     >
       <TextAnimate
