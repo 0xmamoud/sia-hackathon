@@ -4,27 +4,28 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const UploadPage = () => {
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [auditFile, setAuditFile] = useState<File | null>(null);
+  const [infoFile, setInfoFile] = useState<File | null>(null);
+  const [leaseFiles, setLeaseFiles] = useState<FileList | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(e.target.files);
-    setMessage(null); // Clear any previous messages
-  };
-
   const handleUpload = async () => {
-    if (!selectedFiles) {
-      setMessage('Please select files before uploading.');
+    if (!auditFile && !infoFile && !leaseFiles) {
+      setMessage('Please upload at least one file.');
       return;
     }
 
     const formData = new FormData();
 
-    // Append files to formData
-    Array.from(selectedFiles).forEach((file) => {
-      formData.append(file.name.includes('audit') ? 'auditPdf' : 'leasesPdfs', file);
-    });
+    // Append the files to FormData
+    if (auditFile) formData.append('auditPdf', auditFile);
+    if (infoFile) formData.append('excelFile', infoFile);
+    if (leaseFiles) {
+      Array.from(leaseFiles).forEach((file) => {
+        formData.append('leasesPdfs', file);
+      });
+    }
 
     try {
       setLoading(true);
@@ -48,16 +49,52 @@ const UploadPage = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-center">
           <div className="w-full text-center">
-            <p className="mb-10 text-lg leading-relaxed text-gray-700 dark:text-gray-700 sm:text-xl md:text-2xl">
-              Veuillez sélectionner les fichiers à analyser.
+            
+            <p className="mb-10 text-lg leading-relaxed text-gray-900 dark:text-gray-900 sm:text-xl md:text-2xl">
+              Please upload the required files for analysis.
             </p>
             <div className="flex flex-col items-center justify-center space-y-6">
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="block w-full max-w-md text-gray-700 dark:text-gray-300 file:mr-4 file:rounded-lg file:border-none file:bg-blue-600 file:px-4 file:py-2 file:text-white file:shadow-sm file:hover:bg-blue-700"
-              />
+              {/* Upload Button for Audit File */}
+              <div className="w-full max-w-md">
+                <label className="mb-2 block text-sm font-medium text-gray-800 dark:text-gray-600">
+                  Fiche d'audit (PDF):
+                </label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setAuditFile(e.target.files?.[0] || null)}
+                  className="block w-full text-gray-700 dark:text-gray-300 file:mr-4 file:rounded-lg file:border-none file:bg-blue-600 file:px-4 file:py-2 file:text-white file:shadow-sm file:hover:bg-blue-700"
+                />
+              </div>
+
+              {/* Upload Button for Information File */}
+              <div className="w-full max-w-md">
+                <label className="mb-2 block text-sm font-medium text-gray-800 dark:text-gray-600">
+                  Fiche d'information (Excel):
+                </label>
+                <input
+                  type="file"
+                  accept=".xls,.xlsx"
+                  onChange={(e) => setInfoFile(e.target.files?.[0] || null)}
+                  className="block w-full text-gray-700 dark:text-gray-300 file:mr-4 file:rounded-lg file:border-none file:bg-blue-600 file:px-4 file:py-2 file:text-white file:shadow-sm file:hover:bg-blue-700"
+                />
+              </div>
+
+              {/* Upload Button for Lease Files */}
+              <div className="w-full max-w-md">
+                <label className="mb-2 block text-sm font-medium text-gray-800 dark:text-gray-200">
+                  Ba (Multiple PDFs):
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="application/pdf"
+                  onChange={(e) => setLeaseFiles(e.target.files || null)}
+                  className="block w-full text-gray-700 dark:text-gray-300 file:mr-4 file:rounded-lg file:border-none file:bg-blue-600 file:px-4 file:py-2 file:text-white file:shadow-sm file:hover:bg-blue-700"
+                />
+              </div>
+
+              {/* Submit Button */}
               <button
                 onClick={handleUpload}
                 className="rounded-lg bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition duration-300 hover:bg-blue-700 disabled:opacity-50"
@@ -65,6 +102,8 @@ const UploadPage = () => {
               >
                 {loading ? 'Uploading...' : 'Upload Files'}
               </button>
+
+              {/* Feedback Message */}
               {message && (
                 <div className="w-full max-w-3xl rounded-lg bg-gray-100 p-4 shadow-lg dark:bg-gray-800">
                   <pre className="text-left text-sm text-gray-700 dark:text-gray-300">
