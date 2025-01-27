@@ -144,7 +144,7 @@ export function FileUploader() {
 
         </div>
         <Button
-          className="mt-4 inline-block w-full"
+          className="mt-4 inline-block w-full bg-foreground md:text-lg"
           disabled={files.length === 0}
           type="submit"
 
