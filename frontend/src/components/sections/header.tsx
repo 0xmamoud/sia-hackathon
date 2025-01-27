@@ -19,7 +19,8 @@ export function Header() {
 
   return (
     <motion.header
-      className={`fixed w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"
+      className={`fixed w-full z-50 transition-colors duration-300 
+         ${isScrolled ? "bg-white shadow-md" : "bg-transparent md:text-lg"
         }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -35,7 +36,7 @@ export function Header() {
             className="h-10 w-auto"
           />
         </Link>
-        <nav className="hidden md:flex space-x-8">
+        <nav className="hidden md:flex space-x-8 md:text-lg">
           <Link href="#expertise" className="text-shade-gray hover:text-dark-blue transition-colors">
             Expertise
           </Link>
@@ -46,7 +47,7 @@ export function Header() {
             Contact
           </Link>
         </nav>
-        <Button asChild className="bg-dark-blue hover:bg-light-blue text-white">
+        <Button asChild className="bg-dark-blue hover:bg-light-blue text-white md:text-lg">
           <Link href="/dashboard">Dashboard</Link>
         </Button>
       </div>

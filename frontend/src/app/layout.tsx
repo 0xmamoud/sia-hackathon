@@ -33,7 +33,7 @@ export default function RootLayout({
       <body
         className={
           `${inter.variable} ${lora.variable} antialiased font-inter bg-gradient-to-b 
-            from-gray-50 to-white
+            from-gray-50 to-white 
         `}
       >
         {children}
