@@ -1,49 +1,49 @@
-"use client"
 import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { Home, List } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-
-
+import { Home, FileText, Cable } from "lucide-react"
 
 export function Sidebar() {
-  const pathname = usePathname()
-
   return (
-    <section className="bg-background hidden w-64 flex-col  border-r lg:flex">
-      <div className="flex h-14 items-center border-b px-4">
-        <Link className="flex items-center gap-2 font-semibold" href="/">
-          <Image src="/logo.svg" alt="Logo" width={50} height={50} />
-        </Link>
+    <div className="w-64 bg-dark-blue/90 text-white h-screen flex flex-col">
+      <div className="p-6">
+        <h1 className="text-2xl font-bold">LEAZ Dashboard</h1>
       </div>
-      <ScrollArea className="flex-1">
-        <nav className="flex flex-col gap-2 p-4">
-          <Button
-            variant={pathname === "/dashboard" ? "secondary" : "ghost"}
-            className="w-full justify-start"
-            asChild
-          >
-            <Link href="/dashboard">
-              <Home className="mr-2 h-4 w-4" />
-              Dashboard
+      <nav className="flex-1">
+        <ul className="space-y-2 p-4">
+          <li>
+            <Link
+              href="/dashboard"
+              className="flex items-center space-x-3 p-3 rounded-lg md:text-lg 
+                hover:bg-light-blue/70 transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              <span className="font-medium">Home</span>
             </Link>
-          </Button>
-          <Button
-            variant={pathname === "/dashboard/all-creations" ? "secondary" : "ghost"}
-            className="w-full justify-start"
-            asChild
-          >
-            <Link href="/dashboard/creations">
-              <List className="mr-2 h-4 w-4" />
-              All Creations
+          </li>
+          <li>
+            <Link
+              href="/dashboard/audits"
+              className="flex items-center space-x-3 p-3 rounded-lg md:text-lg 
+                hover:bg-light-blue/70 transition-colors"
+            >
+              <FileText className="w-5 h-5" />
+              <span className="font-medium">Audits</span>
             </Link>
-          </Button>
-        </nav>
-      </ScrollArea>
-    </section>
-
-
+          </li>
+        </ul>
+      </nav>
+      <div className="p-4 border-t border-white/10">
+        <button className="p-3 rounded-lg 
+            hover:bg-light-blue/70 transition-colors w-full"
+        >
+          <Link href="/#contact" className="flex items-center space-x-3 md:text-lg" >
+            <Cable className="w-5 h-5" />
+            <span className="font-medium">Lets Connect</span>
+          </Link>
+        </button>
+      </div>
+    </div >
   )
 }
+
+
+
