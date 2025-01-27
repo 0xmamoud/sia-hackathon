@@ -1,66 +1,69 @@
-import React from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { ShimmerButton } from '@/components/ui/shimmer-button'
-import { Button } from '@/components/ui/button'
-import { CustomSeparator } from '@/components/ui/customSeparator'
-import { BoxReveal } from '@/components/ui/box-reveal'
+"use client"
+
+import Link from "next/link"
+import * as motion from 'motion/react-client'
+import { Button } from "@/components/ui/button"
+import { HeroVideoDialogDemo } from "@/components/sections/heroVideoDialog"
 
 export function Hero() {
   return (
-    <section
-      className="container padding-x margin-top font-inter flex 
-        justify-between items-stretch gap-8"
-    >
-
-      <div className="flex-1 flex flex-col justify-between gap-8 lg:py-8">
-        <h1 className="font-lora font-medium text-4xl max-md:text-2xl leading-snug">
-          LEAZ, <br />
-          Transform your commercial lease audits with the power of intelligent AI insights.
-        </h1>
-        <div className="flex justify-center items-center gap-4 font-inter ">
-          <Link href="/dashboard">
-            <ShimmerButton >
-              Get Started
-            </ShimmerButton>
-          </Link>
-          <Button
-            variant="secondary"
-            className="bg-light rounded-3xl px-8 py-6 text-sm font-medium border border-primary/20 group"
+    <section className="pt-32 pb-20 overflow-hidden">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 gap-8 items-center">
+          <motion.div
+            className="col-span-1 md:col-span-2 lg:col-span-1"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <Link
-              href="/#how-it-works"
-              className="flex items-center transition-all duration-300"
-            >
-              <span>Learn More</span>
-              <span
-                aria-hidden="true"
-                className="inline-block transition-all duration-300 group-hover:ml-4 
-                  group-active:ml-6 ml-2"
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 text-center
+              leading-loose font-lora
+              ">
+              Transform your commercial lease audits with the power of
+              <span className="text-dark-blue "> Intelligent AI Insights</span>.
+            </h1>
+            <p className="text-lg mb-8 text-gray-600 text-center">
+              Revolutionizing legal document analysis with advanced AI
+              technology. Experience faster, more accurate, and
+              comprehensive legal auditing solutions.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+              <Button size="lg"
+                className="bg-dark-blue hover:bg-light-blue text-white w-full sm:w-auto md:text-lg"
+                asChild
               >
-                →
-              </span>
-            </Link>
-          </Button>
+                <Link href="/dashboard" >Go to Dashboard</Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-dark-blue border-dark-blue hover:bg-dark-blue md:text-lg
+                  hover:text-white w-full sm:w-auto"
+                asChild
+              >
+                <Link href="#demo">Watch Demo</Link>
+              </Button>
+            </div>
+          </motion.div>
+          <motion.div
+            className="col-span-1 order-first md:order-none"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+          </motion.div>
+          <motion.div
+            className="col-span-1 "
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <HeroVideoDialogDemo />
+          </motion.div>
         </div>
-        <CustomSeparator />
-        <p className="text-slate-500  text-xs md:text-lg">
-          An AI-powered platform designed to simplify and optimize commercial
-          lease audits with precision and efficiency.
-        </p>
       </div>
-      <BoxReveal boxColor='primary/10'>
-        <div className="max-lg:hidden">
-          <Image
-            src="/hero_image.png"
-            alt="Hero"
-            width={500}
-            height={500}
-            className="rounded-3xl object-cover h-full w-full"
-          />
-        </div>
-      </BoxReveal>
-
     </section>
   )
 }
+
+

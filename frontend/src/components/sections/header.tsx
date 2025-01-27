@@ -1,42 +1,58 @@
-import { navLinks } from "@/lib/constants"
-import { NavBar } from "@/components/partials/navBar"
+"use client"
+
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import * as motion from 'motion/react-client'
 import { Button } from "@/components/ui/button"
 
-import Image from "next/image"
-import Link from "next/link"
-
 export function Header() {
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   return (
-    <header
-      className="container font-inter font-medium flex justify-between items-center p-4 max-md:p-2 "
+    <motion.header
+      className={`fixed w-full z-50 transition-colors duration-300 
+         ${isScrolled ? "bg-white shadow-md" : "bg-transparent md:text-lg"
+        }`}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      <Link href="/">
-        <Image
-          src="/logo.svg"
-          alt="Logo"
-          width={50}
-          height={50}
-        />
-      </Link>
-      <nav className="max-md:hidden ">
-        <ul className="flex justify-evenly items-center gap-4 ">
-          {navLinks.map((link) => (
-            <li key={link.href}
-              className="hover:font-semibold hover:bg-background hover:scale-105
-                px-2 py-1 rounded-xl transition-all duration-300 ">
-              <Link href={link.href}>
-                {link.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <Button className="max-md:hidden">
-        <Link href="/dashboard">
-          Dashboard
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logoGide.png"
+            alt="GIDE"
+            width={120}
+            height={40}
+            className="h-10 w-auto"
+          />
         </Link>
-      </Button>
-      <NavBar />
-    </header >
+        <nav className="hidden md:flex space-x-8 md:text-lg">
+          <Link href="/" className="text-shade-gray hover:text-dark-blue transition-colors">
+            Home
+          </Link>
+          <Link href="/#services" className="text-shade-gray hover:text-dark-blue transition-colors">
+            Services
+          </Link>
+          <Link href="#contact" className="text-shade-gray hover:text-dark-blue transition-colors">
+            Contact
+          </Link>
+        </nav>
+        <Button asChild className="bg-dark-blue hover:bg-light-blue text-white md:text-lg">
+          <Link href="/dashboard">Dashboard</Link>
+        </Button>
+      </div>
+    </motion.header>
   )
 }
+
+
