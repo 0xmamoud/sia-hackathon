@@ -7,17 +7,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
-<<<<<<< HEAD
 model lease {
   id                 Int      @id @default(autoincrement())
   createdAt          DateTime @default(now())
   leaseName          String
   processId          String
-=======
-model Result {
-  id                 Int      @id @default(autoincrement())
-  fileId             String
->>>>>>> thomas
   datasourceAudit    Json?
   datasourceExcel    Json?
   docResume          String?

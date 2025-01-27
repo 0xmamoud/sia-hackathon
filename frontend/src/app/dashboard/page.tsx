@@ -59,7 +59,7 @@ export default function DashboardPage() {
     });
 
     try {
-      const response = await axios.post("/process", formData, {
+      const response = await axios.post("/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data"
         }

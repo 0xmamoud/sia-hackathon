@@ -1,199 +1,241 @@
 import Koa from 'koa';
 import Router from '@koa/router';
-import koaBody from 'koa-body';
-import {Context, Next} from 'koa';
+import { Context, Next } from 'koa';
 import path from 'path';
-import {AIProcessService} from "./service/ai.service";
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs';
-import multer from '@koa/multer';
+import koaBody from 'koa-body';
 import { ensureDir } from 'fs-extra';
+import fs from 'fs';
+import { AIProcessService } from './service/ai.service';
 
 const prisma = new PrismaClient();
-
 const app = new Koa();
 const router = new Router();
 
-function hasbody(req: IncomingMessage | undefined): boolean {
-    if (!req || !req.headers) return false;
-    return !!(
-      req.headers['transfer-encoding'] || 
-      (req.headers['content-length'] && 
-       parseInt(req.headers['content-length'] as string, 10) > 0)
-    );
-}
-  
-const storage = multer.diskStorage({
-    destination: async (req, file, cb) => {
-      let uploadPath: string;
-      switch (file.fieldname) {
-        case 'auditPdf':
-          uploadPath = 'uploads/audit';
-          break;
-        case 'excelFile':
-          uploadPath = 'uploads/excel';
-          break;
-        case 'leasesPdfs':
-          uploadPath = 'uploads/leases';
-          break;
-        default:
-          uploadPath = 'uploads';
-      }
-      
-      // Ensure directory exists
-      try {
-        await ensureDir(uploadPath);
-        cb(null, uploadPath);
-      } catch (err) {
-        cb(err as Error, uploadPath);
-      }
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-      cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-    }
-  });
-  
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    const validMimeTypes = {
-      auditPdf: ['application/pdf'],
-      excelFile: [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-        'application/vnd.ms-excel'
-      ],
-      leasesPdfs: ['application/pdf']
-    };
-  
-    const isValidType = validMimeTypes[file.fieldname as keyof typeof validMimeTypes]?.includes(file.mimetype);
-    
-    if (isValidType) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'));
-    }
+// Configure koa-body for multipart uploads
+app.use(koaBody({
+  multipart: true,
+  formidable: {
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    uploadDir: 'input',
+    keepExtensions: true
+  }
+}));
+
+const uploadDir = {
+  audit: 'input/audit',
+  excel: 'input/excel',
+  leases: 'input/lease'
 };
-  
-const upload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { 
-    fileSize: 10 * 1024 * 1024 // 10MB max file size
+
+Object.values(uploadDir).forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 });
 
-const uploadFiles = upload.fields([
-  { name: 'auditPdf', maxCount: 1 },
-  { name: 'excelFile', maxCount: 1 },
-  { name: 'leasesPdfs', maxCount: 50 }
-]);
+router.post('/process', async (ctx: Context) => {
+  try {
+    const { files } = ctx.request;
+    const result: Record<string, string | string[]> = {};
 
-app.use(koaBody({ multipart: true }));
-
-router.post('/upload', async (ctx: Context, next: Next) => {
-    if (!hasbody(ctx.req)) {
-        ctx.status = 400;
-        ctx.body = { error: 'No request body' };
-        return;
-      }
-  
-      try {
-        await new Promise((resolve, reject) => {
-          uploadFiles(ctx.req, ctx.res, (err) => {
-            if (err instanceof multer.MulterError) {
-              ctx.status = 400;
-              ctx.body = { error: err.message };
-              return reject(err);
-            } else if (err) {
-              ctx.status = 500;
-              ctx.body = { error: 'Upload failed' };
-              return reject(err);
-            }
-            resolve(null);
-          });
-        });
+    let auditFileName = "";
+    let excelFileName = "";
+    let leaseFileName = [] as string[];
     
-        ctx.body = {
-          message: 'Files uploaded successfully',
-          files: {
-            auditPdf: (ctx.req as any).files['auditPdf']?.[0]?.filename ?? null,
-            excelFile: (ctx.req as any).files['excelFile']?.[0]?.filename ?? null,
-            leasesPdfs: (ctx.req as any).files['leasesPdfs']?.map((file: any) => file.filename) ?? []
-          }
-        };
-      } catch (error) {
-        ctx.status = 500;
-        ctx.body = { error: (error as Error).message };
+    
+    if (files?.auditPdf) {
+      const auditFile = files.auditPdf as any;
+      if (auditFile.mimetype === 'application/pdf') {
+        auditFileName = auditFile.originalFilename;
+        const newPath = path.join(uploadDir.audit, `audit-${Date.now()}${path.extname(auditFile.originalFilename)}`);
+        fs.renameSync(auditFile.filepath, newPath);
+        result.auditPdf = path.basename(newPath);
       }
-});
-
-router.post('/get_loans_db', async (ctx) => {
-    try {
-        const leaseNames = await prisma.lease.findMany({
-            select: {
-                leaseName: true, 
-            },
-        });
-
-        ctx.body = {
-            success: true,
-            data: leaseNames.map((lease) => lease.leaseName),
-        };
-    } catch (error) {
-      console.error('Error fetching lease names:', error);
-      ctx.status = 500;
-      ctx.body = {
-        success: false,
-        message: 'Failed to fetch lease names',
-        error: (error as Error).message,
-      };
     }
+
+    // Handle Excel file
+    if (files?.excelFile) {
+      const excelFile = files.excelFile as any;
+      const validTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
+      ];
+      if (validTypes.includes(excelFile.mimetype)) {
+        excelFileName = excelFile.originalFilename;
+        const newPath = path.join(uploadDir.excel, `excel-${Date.now()}${path.extname(excelFile.originalFilename)}`);
+        fs.renameSync(excelFile.filepath, newPath);
+        result.excelFile = path.basename(newPath);
+      }
+    }
+
+    if (files?.leasesPdfs) {
+      const leaseFiles = Array.isArray(files.leasesPdfs) ? files.leasesPdfs : [files.leasesPdfs];
+      result.leasesPdfs = (leaseFiles as any[])
+        .filter((file: any) => file.mimetype === 'application/pdf')
+        .map((file: any) => {
+          leaseFileName.push(file.originalFilename);
+          const newPath = path.join(uploadDir.leases, `lease-${Date.now()}${path.extname(file.originalFilename)}`);
+          fs.renameSync(file.filepath, newPath);
+          return path.basename(newPath);
+        });
+    }
+        
+    const aiService = new AIProcessService(
+      prisma,
+      `input/audit/${result.auditPdf}`,
+      `input/excel/${result.excelFile}`,
+      (result.leasesPdfs as string[]).map((pdf: string) => `input/lease/${pdf}`),
+      auditFileName,
+      excelFileName,
+      leaseFileName
+    );    
+    
+    ctx.body = {
+      message: 'Processing workflow successfully',
+      files: await aiService.start()
+    };
+  } catch (error) {
+    ctx.status = 500;
+    console.log(error)
+    ctx.body = { 
+      error: 'Upload failed', 
+      details: (error as Error).message 
+    };
+  }
 });
 
-router.post('/get_loan_details', async (ctx) => {
-    try {
-        const { id } = ctx.request.body;
+router.get('/get_loans_db', async (ctx) => {
+  try {
+      const leaseNames = await prisma.lease.findMany({
+          select: {
+              leaseName: true,
+              id: true,
+          },
+      });
+      console.log(leaseNames)
+      ctx.body = {
+          success: true,
+          data: leaseNames.map((lease) => ({
+            id: lease.id,
+            name: lease.leaseName,
+          })),
+      };
+  } catch (error) {
+    console.error('Error fetching lease names:', error);
+    ctx.status = 500;
+    ctx.body = {
+      success: false,
+      message: 'Failed to fetch lease names',
+      error: (error as Error).message,
+    };
+  }
+});
 
-        if (!id) {
-            ctx.status = 400;
-            ctx.body = {
-                success: false,
-                message: 'Loan ID is required',
-            };
-            return;
-        }
+router.get('/get_loan_details_by_name/:name', async (ctx) => {
+try {
+    const { name } = ctx.params;
 
-        const loanDetails = await prisma.lease.findUnique({
-            where: {
-                id: parseInt(id, 10),
-            },
-            select: {
-                datasourceAudit: true,
-                datasourceExcel: true,
-            },
-        });
-
-        if (!loanDetails) {
-            ctx.status = 404;
-            ctx.body = {
-                success: false,
-                message: 'Loan not found',
-            };
-            return;
-        }
-
+    if (!name) {
+        ctx.status = 400;
         ctx.body = {
-            success: true,
-            data: loanDetails,
+            success: false,
+            message: 'Lease name is required',
         };
-    } catch (error) {
-        console.error('Error fetching loan details:', error);
+        return;
+    }
+
+    const loans = await prisma.lease.findMany({
+        where: {
+            leaseName: name,
+        },
+        orderBy: {
+            leaseName: 'asc',
+        },
+        select: {
+            datasourceAudit: true,
+            datasourceExcel: true,
+        },
+    });
+
+    if (loans.length === 0) {
+        ctx.status = 404;
+        ctx.body = {
+            success: false,
+            message: 'No loans found with the given name',
+        };
+        return;
+    }
+
+    ctx.body = {
+        success: true,
+        data: {
+            leaseName: name,
+            details: loans,
+        },
+    };
+    
+} catch (error) {
+    console.error('Error fetching loan details by name:', error);
+    ctx.status = 500;
+    ctx.body = {
+        success: false,
+        message: 'Failed to fetch loan details by name',
+        error: error.message,
+    };
+}
+});
+
+router.delete('/delete_lease/:id', async (ctx) => {
+try {
+    const { id } = ctx.params;
+    if (!id) {
+        ctx.status = 400;
+        ctx.body = {
+            success: false,
+            message: 'Lease ID is required',
+        };
+        return;
+    }
+
+    const parsedId = parseInt(id, 10);
+      if (isNaN(parsedId)) {
+          ctx.status = 400;
+          ctx.body = {
+              success: false,
+              message: 'Invalid Lease ID format',
+          };
+          return;
+      }
+    
+    const deletedLease = await prisma.lease.delete({
+        where: {
+            id: parsedId, // Use the parsed integer ID
+        },
+    });
+    ctx.body = {
+        success: true,
+        message: 'Lease deleted successfully',
+        data: deletedLease,
+    };
+} catch (error) {
+    console.error('Error deleting lease:', error);
+
+    if (error.code === 'P2025') {
+        ctx.status = 404;
+        ctx.body = {
+            success: false,
+            message: 'Lease not found',
+        };
+    } else {
         ctx.status = 500;
         ctx.body = {
             success: false,
-            message: 'Failed to fetch loan details',
+            message: 'Failed to delete lease',
             error: error.message,
         };
     }
+}
 });
 
 app.use(router.routes());
