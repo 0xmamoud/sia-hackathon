@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, Download, ChevronDown, ChevronRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { PDFViewer } from "@/components/sections/pdfViewer"
 
 type SynthesisData = {
   totalRent: string
@@ -19,6 +20,7 @@ type Audit = {
   id: number
   name: string
   date: string
+  pdfUrl: string
   summary: string
   keyFindings: string
   synthesisData: SynthesisData
@@ -37,6 +39,7 @@ const initialAudits: Audit[] = [
     id: 1,
     name: "Office Lease 2023",
     date: "2023-06-15",
+    pdfUrl: "/sample.pdf",
     summary: "Annual office lease review for headquarters.",
     keyFindings: "No major issues found. Rent increase within market rates.",
     synthesisData: {
@@ -50,6 +53,7 @@ const initialAudits: Audit[] = [
     id: 2,
     name: "Retail Space Agreement",
     date: "2023-07-22",
+    pdfUrl: "/sample.pdf",
     summary: "New retail space lease in downtown location.",
     keyFindings: "Potential issues with maintenance clause. Recommend legal review.",
     synthesisData: {
@@ -63,6 +67,7 @@ const initialAudits: Audit[] = [
     id: 3,
     name: "Warehouse Lease Renewal",
     date: "2023-08-05",
+    pdfUrl: "/sample.pdf",
     summary: "Renewal of existing warehouse lease with updated terms.",
     keyFindings: "Favorable terms negotiated. Early termination clause added.",
     synthesisData: {
@@ -76,6 +81,7 @@ const initialAudits: Audit[] = [
     id: 4,
     name: "Co-working Space Contract",
     date: "2023-09-10",
+    pdfUrl: "/sample.pdf",
     summary: "Short-term lease for co-working space in tech hub.",
     keyFindings: "Flexible terms align with company needs. No significant risks identified.",
     synthesisData: {
@@ -89,6 +95,7 @@ const initialAudits: Audit[] = [
     id: 5,
     name: "Restaurant Lease Agreement",
     date: "2023-10-18",
+    pdfUrl: "/sample.pdf",
     summary: "New lease for restaurant space in shopping mall.",
     keyFindings: "Complex revenue sharing model. Legal and financial review recommended.",
     synthesisData: {
@@ -165,13 +172,17 @@ export default function AuditsPage() {
   const [nameFilter, setNameFilter] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({})
+  const [isPDFOpen, setIsPDFOpen] = useState(false)
+  const [selectedAudit, setSelectedAudit] = useState(null)
+
 
   const filteredAudits = audits.filter(
     (audit) => audit.name.toLowerCase().includes(nameFilter.toLowerCase()) && audit.date.includes(dateFilter)
   )
 
-  const handleViewAudit = (audit: Audit) => {
-    alert(`Viewing full audit report for: ${audit.name}`)
+  const handleViewAudit = (audit) => {
+    setSelectedAudit(audit)
+    setIsPDFOpen(true)
   }
 
   const handleDownloadAudit = (audit: Audit) => {
@@ -236,6 +247,15 @@ export default function AuditsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {isPDFOpen && (
+        <PDFViewer
+          isOpen={isPDFOpen}
+          onClose={() => setIsPDFOpen(false)}
+          pdfUrl="/sample.pdf"
+          documentName={selectedAudit?.name}
+        />
+      )}
     </div>
   )
 }

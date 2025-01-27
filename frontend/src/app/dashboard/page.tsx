@@ -5,50 +5,65 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, Download, BarChart, FileText } from "lucide-react"
+import { Eye, Download, BarChart, FileText, X } from "lucide-react"
 import { FileUploader } from "@/components/forms/fileUpload"
+import { PDFViewer } from "@/components/sections/pdfViewer"
 
 const initialAudits = [
-  { id: 1, name: "Office Lease 2023", date: "2023-06-15", summary: "Annual office lease review for headquarters." },
+  { id: 1, name: "Office Lease 2023", date: "2023-06-15", summary: "Annual office lease review for headquarters.", pdfUrl: "/sample.pdf" },
   {
     id: 2,
     name: "Retail Space Agreement",
     date: "2023-07-22",
     summary: "New retail space lease in downtown location.",
+    pdfUrl: "/sample.pdf"
   },
   {
     id: 3,
     name: "Warehouse Lease Renewal",
     date: "2023-08-05",
     summary: "Renewal of existing warehouse lease with updated terms.",
+    pdfUrl: "/sample.pdf"
   },
   {
     id: 4,
     name: "Co-working Space Contract",
     date: "2023-09-10",
     summary: "Short-term lease for co-working space in tech hub.",
+    pdfUrl: "/sample.pdf"
   },
   {
     id: 5,
     name: "Restaurant Lease Agreement",
     date: "2023-10-18",
     summary: "New lease for restaurant space in shopping mall.",
+    pdfUrl: "/sample.pdf"
   },
 ]
 
+
+
 export default function DashboardPage() {
   const [audits, setAudits] = useState(initialAudits)
+  const [isPDFOpen, setIsPDFOpen] = useState(false)
+  const [selectedAudit, setSelectedAudit] = useState(null)
 
-  const handleViewAudit = (audit: { id: number; name: string; date: string; summary: string }) => {
-    alert(`Viewing audit: ${audit.summary}`)
+  const handleViewAudit = (audit) => {
+    setSelectedAudit(audit)
+    setIsPDFOpen(true)
   }
 
-  const handleDownloadAudit = (audit: { id: number; name: string; date: string; summary: string }) => {
+  const handleClosePDF = () => {
+    setIsPDFOpen(false)
+  }
+
+  const handleDownloadAudit = (audit) => {
     alert(`Downloading audit for ${audit.name}`)
   }
 
   return (
     <div className="container mx-auto p-6 space-y-8 md:text-lg">
+      {/* Keep all your existing JSX code exactly as is */}
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -80,34 +95,44 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+      <div>
+        <div className="flex max-md:flex-col justify-evenly gap-2 mx-auto w-full">
+          <Card className="w-fit">
+            <CardHeader>
+              <CardTitle>Upload New Lease</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUploader />
+            </CardContent>
+          </Card>
 
-      <div className="flex max-md:flex-col justify-evenly gap-2 mx-auto w-full">
-        <Card className="w-fit">
-          <CardHeader>
-            <CardTitle>Upload New Lease</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileUploader />
-          </CardContent>
-        </Card>
+          <Card className="w-fit">
+            <CardHeader>
+              <CardTitle>Upload Excel Synthesis File</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUploader />
+            </CardContent>
+          </Card>
 
-        <Card className="w-fit">
-          <CardHeader>
-            <CardTitle>Upload Excel Synthesis File</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileUploader />
-          </CardContent>
-        </Card>
-
-        <Card className="w-fit">
-          <CardHeader>
-            <CardTitle>Upload New Lease</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileUploader />
-          </CardContent>
-        </Card>
+          <Card className="w-fit">
+            <CardHeader>
+              <CardTitle>Upload New Lease</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUploader />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="flex justify-center">
+          <Button
+            className="mt-4 w-fit bg-foreground md:text-lg"
+            type="submit"
+            form="file-upload-form"
+          >
+            Launch Analysis
+          </Button>
+        </div>
       </div>
       <Card>
         <CardHeader>
@@ -133,8 +158,7 @@ export default function DashboardPage() {
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
-                      <Button className="bg-foreground"
-                        size="sm" onClick={() => handleDownloadAudit(audit)}>
+                      <Button className="bg-foreground" size="sm" onClick={() => handleDownloadAudit(audit)}>
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
@@ -146,8 +170,14 @@ export default function DashboardPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Add the PDF Viewer component at the end */}
+      <PDFViewer
+        isOpen={isPDFOpen}
+        onClose={handleClosePDF}
+        pdfUrl={selectedAudit?.pdfUrl}
+        documentName={selectedAudit?.name}
+      />
     </div>
   )
 }
-
-
