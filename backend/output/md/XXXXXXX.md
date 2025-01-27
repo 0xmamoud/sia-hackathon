@@ -365,7 +365,11 @@ Le preneur dispose par ailleurs de la possibilité de changer à tout moment le 
 
 Le prix du mobilier, qui sera ainsi supporté par le bailleur, ne pourra être supéreur au prix du mobilier Hors Taxes acquis par le bailleur inilialement ougmenté de 10% (soit selon la formulé suivante = prix mobilier origine HT x 1.1). Lorsque plusieurs éléments mobiliers sont renouvelés simultanément, il n'y a pas lieu à distinclion du prix de chaque élément, et c'est lensemble du coût des éléments concemés qui constitue lassiette du calcul. Le preneur devra accompagner sa demande de tout justificatif .
 
+<<<<<<< HEAD
 
+=======
+## Artlcle ?. Cesslon souS-locatlon
+>>>>>>> thomas
 
 Le Preneur, conformément à larticle 1717 du Code civil, pourra céder son droit au présent bail à toute personne physique ou morale à la condition expresse que le cessionnaire poursuive l'exploitation en résidence de services avec fournilure de prestations para hotellères, selon les mêmes droits et obligations telles qu'elles sont stipulées aux présentes. à sous-louer les locoux meublés objets du présenl buil à tout sous-locataire
 
