@@ -1,0 +1,65 @@
+[
+  {
+    index: 0,
+    message: {
+      role: "assistant",
+      content: "{\n  \"A1\": \"172 re Raimon de Trencavel Le Clos des Muses CS 40066 34075 MONTPELLIER CEDEX 3\",\n  \"B1\": \"Laélé\",\n  \"C1\": \"EL, société immatriculée au RCS de Montpellier sous le numéro 535 302 525\",\n  \"D1\": \"01/10/2016\",\n  \"E1\": \"30/06/2025\"\n}",
+      refusal: null,
+    },
+    logprobs: null,
+    finish_reason: "stop",
+  }
+]
+{
+  "A1": "172 re Raimon de Trencavel Le Clos des Muses CS 40066 34075 MONTPELLIER CEDEX 3",
+  "B1": "Laélé",
+  "C1": "EL, société immatriculée au RCS de Montpellier sous le numéro 535 302 525",
+  "D1": "01/10/2016",
+  "E1": "30/06/2025"
+}
+
+
+//DATA FROM AUDIT
+{
+  "0": {
+    "0": "172 re Raimon de Trencavel, Le Clos des Muses, CS 40066, 34075 Montpellier Cedex 3",
+    "1": "Laélé",
+    "2": "EL, société à responsabilité limitée, immatriculée au RCS de Montpellier sous le numéro 535 302 525",
+    "3": "01/10/2016",
+    "4": "30/09/2025",
+    "5": "9 ans"
+  }
+}
+
+{
+  "element_1": "null",
+  "element_2": "GLOBAL EXPLOITATION, 535 302 525",
+  "element_3": "non"
+}
+------------------------------------
+{
+  "element_4": "26 Rue d'Alsace, 34500 Béziers",
+  "element_5": "25,46 m², null, Quote-part de parties communes incluse (oui)",
+  "element_6": "null",
+  "element_7": "Exploitation de son activité de location en Résidence de Services avec prestations para-hôtelières.",
+  "element_8": "Oui, le Bailleur s'interdit d'exploiter directement ou indirectement un commerce similaire à celui du Preneur dans le surplus de l'immeuble.",
+  "element_9": "Oui, le Preneur s'interdit d'implanter un autre local à proximité des Locaux Loués pour exercer la même activité."
+}
+------------------------------------
+{
+  "element_10": null,
+  "element_11": null
+}
+------------------------------------
+{
+  "element_12": "30/06/2016",
+  "element_13": "non",
+  "element_14": "01/10/2016",
+  "element_15": "9 ans",
+  "element_16": "01/10/2025",
+  "element_17": "oui, 3 ans",
+  "element_18": "01/10/2025",
+  "element_19": "6 mois",
+  "element_20": "non"
+}
+
