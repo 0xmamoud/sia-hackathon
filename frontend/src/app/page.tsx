@@ -5,7 +5,7 @@ import { Header } from '@/components/sections/header';
 
 export default function Home() {
   return (
-    <section className='container'>
+    <section >
       <Header />
       <Hero />
       <HowItWorks />

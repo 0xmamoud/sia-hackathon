@@ -31,11 +31,12 @@ export default function RootLayout({
         <link rel="icon" href="/logo.svg" />
       </head>
       <body
-        className={`${inter.variable} ${lora.variable} antialiased bg-background font-inter`}
+        className={
+          `${inter.variable} ${lora.variable} antialiased font-inter bg-gradient-to-b 
+            from-gray-50 to-white
+        `}
       >
-
         {children}
-        <Footer />
       </body>
     </html>
   );

@@ -1,4 +1,3 @@
-
 "use client"
 import React, { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { Upload, File, X } from 'lucide-react';
