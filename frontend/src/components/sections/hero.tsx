@@ -29,15 +29,15 @@ export function Hero() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               <Button size="lg"
-                className="bg-dark-blue hover:bg-light-blue text-white w-full sm:w-auto"
+                className="bg-dark-blue hover:bg-light-blue text-white w-full sm:w-auto md:text-lg"
                 asChild
               >
-                <Link href="/dashboard">Go to Dashboard</Link>
+                <Link href="/dashboard" >Go to Dashboard</Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="text-dark-blue border-dark-blue hover:bg-dark-blue 
+                className="text-dark-blue border-dark-blue hover:bg-dark-blue md:text-lg
                   hover:text-white w-full sm:w-auto"
                 asChild
               >
