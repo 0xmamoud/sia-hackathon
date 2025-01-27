@@ -37,10 +37,10 @@ export function Header() {
           />
         </Link>
         <nav className="hidden md:flex space-x-8 md:text-lg">
-          <Link href="#expertise" className="text-shade-gray hover:text-dark-blue transition-colors">
-            Expertise
+          <Link href="/" className="text-shade-gray hover:text-dark-blue transition-colors">
+            Home
           </Link>
-          <Link href="#services" className="text-shade-gray hover:text-dark-blue transition-colors">
+          <Link href="/#services" className="text-shade-gray hover:text-dark-blue transition-colors">
             Services
           </Link>
           <Link href="#contact" className="text-shade-gray hover:text-dark-blue transition-colors">
