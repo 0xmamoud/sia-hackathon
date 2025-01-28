@@ -276,6 +276,9 @@ export class AIProcessService {
   }
 
   public async start() {
+    const fileIds = [];
+
+
     for await (const lease of this.leasesPath) {
       const file = await this.prisma.lease.create({
         data: {
@@ -291,6 +294,7 @@ export class AIProcessService {
 
       const fileId = file.id;
       const result = await this.scanLease(fileId, lease, excelCase, auditCase);
+      fileIds.push(fileId);
     }
 
     await this.excelsService.writeExcel(
@@ -299,12 +303,34 @@ export class AIProcessService {
       `output/${this.ID}.xlsx`
     );
 
+    const leases = await this.prisma.lease.findMany({
+        where: {
+            id: {
+                in: fileIds
+            },
+        },
+        select: {
+          leaseName: true,
+          processId: true,
+          templateAuditPath: true,
+          templateExcelPath: true,
+          createdAt: true,
+          id: true,
+        },
+    })
+
     return {
       processId: this.ID,
       excel: `http://localhost:3001/output/${this.ID}.xlsx`,
-      leases: this.leaseOutputPath.map(
-        (path) => `http://localhost:3001/output/${path.split("/").pop()}`
-      ),
+      leases: leases.map((lease) => ({
+        id: lease.id,
+        name: lease.leaseName,
+        date: lease.createdAt,
+        auditTemplatePath: `http://localhost:3001/input/audit/${lease.templateAuditPath.split("/").pop()}`,
+        excelTemplatePath: `http://localhost:3001/input/excel/${lease.templateExcelPath.split("/").pop()}`,
+        excelPath: `http://localhost:3001/output/${lease.processId}.xlsx`,
+        leasePath: `http://localhost:3001/output/${lease.id}.pdf`,
+      })),
     };
   }
 }
