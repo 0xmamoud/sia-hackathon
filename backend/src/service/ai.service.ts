@@ -131,15 +131,15 @@ export class AIProcessService {
         },
       ] as { role: "system" | "user"; content: string }[];
 
-      const response = (await this.callToAgent(message)) as any;
+      //const response = (await this.callToAgent(message)) as any;
 
-      console.log(response);
+      //console.log(response);
 
       // const response = Object.assign({}, ...cases.map((c) => ({
       //     [`${c.page}${c.column}${c.index}`]: c.name
       // })))
 
-      // const response = await fsp.readFile(`trash/excel-${excelScan.indexOf(use_case)}.json`, 'utf8');
+      const response = await fsp.readFile(`trash/excel-${excelScan.indexOf(use_case)}.json`, 'utf8');
 
       let outerJson = JSON.parse(response);
 
@@ -153,8 +153,8 @@ export class AIProcessService {
         page: parseInt(key[0]),
         value:
           !outerJson[key] ||
-          outerJson[key].length === 0 ||
-          outerJson[key] === "null"
+            outerJson[key].length === 0 ||
+            outerJson[key] === "null"
             ? "Non indiqué"
             : outerJson[key],
       }));
@@ -198,8 +198,8 @@ export class AIProcessService {
         },
       ] as { role: "system" | "user"; content: string }[];
 
-      const response = (await this.callToAgent(message)) as any;
-      // const response = await fsp.readFile(`trash/${index}-${auditScan.indexOf(use_case)}.json`, 'utf8');
+      //const response = (await this.callToAgent(message)) as any;
+      const response = await fsp.readFile(`trash/${index}-${auditScan.indexOf(use_case)}.json`, 'utf8');
 
       console.log(response);
 

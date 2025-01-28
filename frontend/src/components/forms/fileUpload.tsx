@@ -1,16 +1,20 @@
-"use client"
-import React, { useState, useRef, DragEvent, ChangeEvent } from 'react';
-import { Upload, File, X } from 'lucide-react';
-import { Button } from '@/components/ui/button'
-import { API_URL } from '@/lib/constants';
+"use client";
+import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { Upload, File, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { API_URL } from "@/lib/constants";
 
 interface FileWithProgress {
   file: File;
   progress: number;
-  status: 'pending' | 'completed';
+  status: "pending" | "completed";
 }
 
-export function FileUploader() {
+interface FileUploaderProps {
+  onUploadSuccess: (data: any) => void; // Callback to pass response data to parent
+}
+
+export function FileUploader({ onUploadSuccess }: FileUploaderProps) {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [files, setFiles] = useState<FileWithProgress[]>([]);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -42,76 +46,69 @@ export function FileUploader() {
   const handleFiles = (newFiles: FileList): void => {
     const fileList = Array.from(newFiles);
     const uniqueFiles = fileList.filter(
-      newFile => !files.some(existingFile => existingFile.file.name === newFile.name)
+      (newFile) =>
+        !files.some((existingFile) => existingFile.file.name === newFile.name)
     );
 
-    const filesWithProgress: FileWithProgress[] = uniqueFiles.map(file => ({
+    const filesWithProgress: FileWithProgress[] = uniqueFiles.map((file) => ({
       file,
       progress: 0,
-      status: 'pending'
+      status: "pending",
     }));
 
-    setFiles(prevFiles => [...prevFiles, ...filesWithProgress]);
+    setFiles((prevFiles) => [...prevFiles, ...filesWithProgress]);
     simulateUploads(filesWithProgress);
   };
 
   const simulateUploads = (filesToUpload: FileWithProgress[]): void => {
     filesToUpload.forEach((fileObj) => {
       const uploadInterval = setInterval(() => {
-        setFiles(prevFiles => prevFiles.map((f) => {
-          if (f.file.name === fileObj.file.name) {
-            const newProgress = f.progress + Math.floor(Math.random() * 40);
-            if (newProgress >= 100) {
-              clearInterval(uploadInterval);
-              return { ...f, progress: 100, status: 'completed' };
+        setFiles((prevFiles) =>
+          prevFiles.map((f) => {
+            if (f.file.name === fileObj.file.name) {
+              const newProgress = f.progress + Math.floor(Math.random() * 40);
+              if (newProgress >= 100) {
+                clearInterval(uploadInterval);
+                return { ...f, progress: 100, status: "completed" };
+              }
+              return { ...f, progress: newProgress };
             }
-            return { ...f, progress: newProgress };
-          }
-          return f;
-        }));
+            return f;
+          })
+        );
       }, 200);
     });
   };
 
   const removeFile = (fileName: string): void => {
-    setFiles(prevFiles => prevFiles.filter(f => f.file.name !== fileName));
+    setFiles((prevFiles) => prevFiles.filter((f) => f.file.name !== fileName));
   };
 
-  const downloadFile = (fileObj: FileWithProgress): void => {
-    const url = URL.createObjectURL(fileObj.file);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileObj.file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setUploading(true);
     const formData = new FormData();
-    files.forEach(fileObj => {
-      formData.append('leasesPdf', fileObj.file);
+    files.forEach((fileObj) => {
+      formData.append("leasesPdfs", fileObj.file);
     });
 
     try {
-      const response = await fetch(`${API_URL}/upload`,
-        {
-          method: 'POST',
-          headers: {
-            'Access-Control-Allow-Origin': '*'
-          },
-          body: formData
-        });
+      const response = await fetch(`${API_URL}/upload`, {
+        method: "POST",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: formData,
+      });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (!response.ok) {
         throw new Error(data.message);
       }
 
+      console.log(data);
       setUploading(false);
+      onUploadSuccess(data); // Pass the response data to the parent component
     } catch (error) {
       console.error(error);
       setUploading(false);
@@ -120,18 +117,12 @@ export function FileUploader() {
 
   return (
     <section className="max-w-md margin-y mx-auto p-6 bg-white rounded-lg shadow-md">
-      <form
-        onDragEnter={handleDrag}
-        onSubmit={handleSubmit}
-      >
+      <form onDragEnter={handleDrag} onSubmit={handleSubmit}>
         <div
           className={`relative transition-all p-4 border-2 border-dashed rounded-lg 
-            duration-300 ${dragActive ? 'border-blue-500 bg-blue-50'
-              :
-              'border-gray-300 bg-gray-50'
+            duration-300 ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"
             }`}
         >
-
           <input
             ref={inputRef}
             type="file"
@@ -157,7 +148,6 @@ export function FileUploader() {
             <p className="text-xs text-gray-500">
               Supported formats: PDF, DOC, DOCX, TXT
             </p>
-
           </div>
           {dragActive && (
             <div
@@ -168,15 +158,13 @@ export function FileUploader() {
               onDrop={handleDrop}
             ></div>
           )}
-
         </div>
         <Button
           className="mt-4 inline-block w-full bg-foreground md:text-lg"
           disabled={files.length === 0 || uploading}
           type="submit"
-
         >
-          {uploading ? 'Analysis in process...' : 'Start Analysis'}
+          {uploading ? "Analysis in process..." : "Start Analysis"}
         </Button>
       </form>
 
@@ -224,4 +212,3 @@ export function FileUploader() {
     </section>
   );
 }
-
