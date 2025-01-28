@@ -1,15 +1,14 @@
 "use client"
 
-import { useState, useEffect, Fragment } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-//import { Input } from "@/components/ui/input"
-//import { Label } from "@/components/ui/label"
 import { isEqual, parseISO, startOfDay } from "date-fns"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, Sheet, ChevronDown, ChevronRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { AuditFilter } from "@/components/forms/auditFilter"
 import { PDFViewer } from "@/components/sections/pdfViewer"
+import { API_URL } from "@/lib/constants"
 
 type Audit = {
   id: number
@@ -18,7 +17,10 @@ type Audit = {
   leasePath: string
   excelPath: string
   summary: string
-  synthesisData: Record<string, string | number | boolean | null>;
+  synthesisData: {
+    key: string
+    value: string
+  }[]
 
 }
 
@@ -38,12 +40,11 @@ const initialAudits: Audit[] = [
     leasePath: "http://localhost:3001/output/99.pdf",
     excelPath: "http://localhost:3001/output/H3RDC0DE.xlsx",
     summary: "Annual office lease review for headquarters.",
-    synthesisData: {
-      totalRent: "$100,000",
-      leaseTerms: "5 years",
-      renewalOptions: "1 x 5 years",
-      maintenanceResponsibility: "Tenant"
-    }
+    synthesisData: [
+      { key: "Total Rent", value: "$1,000,000" },
+      { key: "Lease Term", value: "5 years" },
+      { key: "Rentable Area", value: "10,000 sq. ft." },
+    ],
   }
 ]
 
@@ -89,10 +90,10 @@ const AuditRow = ({ audit, isExpanded, onToggle, onView, onDownload }: AuditRowP
             <div className="p-4 bg-gray-50 rounded-lg">
               <h3 className="font-semibold text-lg mb-4">Synthesis Data</h3>
               <dl className="divide-y divide-gray-200">
-                {Object.entries(audit.synthesisData).map(([key, value]) => (
-                  <div key={key} className="flex items-center py-2">
-                    <dt className="text-lg text-gray-600 flex-1">{key}:</dt>
-                    <dd className="text-lg font-medium text-gray-900">{value}</dd>
+                {audit.synthesise.map((item) => (
+                  <div key={item.key} className="flex items-center py-2">
+                    <dt className="text-lg text-gray-600 flex-1">{item.key}:</dt>
+                    <dd className="text-lg font-medium text-gray-900">{item.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -140,6 +141,23 @@ export default function AuditsPage() {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  useEffect(() => {
+    const fetchAudits = async () => {
+      try {
+        const response = await fetch(`${API_URL}/leases`);
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
+        console.log(data)
+        setAudits(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchAudits();
+  }, []);
+
   return (
     <div className="container mx-auto p-6 space-y-8 text-xl">
       <h1 className="text-3xl font-bold text-gray-900">Audit History</h1>
@@ -162,16 +180,18 @@ export default function AuditsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAudits.map((audit) => (
-                <AuditRow
-                  key={audit.id}
-                  audit={audit}
-                  isExpanded={expandedRows[audit.id] || false}
-                  onToggle={() => toggleRow(audit.id)}
-                  onView={handleViewAudit}
-                  onDownload={handleDownloadAudit}
-                />
-              ))}
+              {filteredAudits
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((audit) => (
+                  <AuditRow
+                    key={audit.id}
+                    audit={audit}
+                    isExpanded={expandedRows[audit.id] || false}
+                    onToggle={() => toggleRow(audit.id)}
+                    onView={handleViewAudit}
+                    onDownload={handleDownloadAudit}
+                  />
+                ))}
             </TableBody>
           </Table>
         </CardContent>
