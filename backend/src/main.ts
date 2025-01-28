@@ -138,14 +138,12 @@ router.get("/leases", async (ctx: Context) => {
     },
   });
 
-  console.log(leases);
-
   ctx.body = leases.map((lease) => ({
     id: lease.id,
     name: lease.leaseName,
     date: lease.createdAt,
-    auditTemplatePath: `http://localhost:3001/input/audit/${lease.templateAuditPath}`,
-    excelTemplatePath: `http://localhost:3001/input/excel/${lease.templateExcelPath}`,
+    auditTemplatePath: `http://localhost:3001/input/audit/${lease.templateAuditPath.split("/").pop()}`,
+    excelTemplatePath: `http://localhost:3001/input/excel/${lease.templateExcelPath.split("/").pop()}`,
     excelPath: `http://localhost:3001/output/${lease.processId}.xlsx`,
     leasePath: `http://localhost:3001/output/${lease.id}.pdf`,
   }));
