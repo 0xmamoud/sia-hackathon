@@ -134,8 +134,13 @@ router.get("/leases", async (ctx: Context) => {
       templateAuditPath: true,
       templateExcelPath: true,
       createdAt: true,
+      datasourceExcel: true,
       id: true,
     },
+  });
+
+  leases.forEach((lease) => {
+    console.log((lease.datasourceExcel as any).slice(0, 5));
   });
 
   ctx.body = leases.map((lease) => ({
@@ -146,6 +151,7 @@ router.get("/leases", async (ctx: Context) => {
     excelTemplatePath: `http://localhost:3001/input/excel/${lease.templateExcelPath.split("/").pop()}`,
     excelPath: `http://localhost:3001/output/${lease.processId}.xlsx`,
     leasePath: `http://localhost:3001/output/${lease.id}.pdf`,
+    synthesise: (lease.datasourceExcel as any).slice(0, 5).map((data: any) => ({key: data.labelName, value: data.value})),
   }));
 });
 

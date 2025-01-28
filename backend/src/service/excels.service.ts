@@ -9,6 +9,7 @@ const getKeysForFirstRow = (sheet) => {
 };
 
 interface IExcelCategory {
+    labelName?: string
     index: string
     label: string
     page: number

@@ -147,17 +147,20 @@ export class AIProcessService {
         outerJson = JSON.parse(outerJson);
       }
 
-      const sheetValues = Object.keys(outerJson).map((key) => ({
-        label: key[1],
-        index: `${key[1]}${parseInt(key.slice(2)) + index}`,
-        page: parseInt(key[0]),
-        value:
-          !outerJson[key] ||
-            outerJson[key].length === 0 ||
-            outerJson[key] === "null"
-            ? "Non indiqué"
-            : outerJson[key],
-      }));
+      const sheetValues = Object.keys(outerJson).map((key) => {
+        return ({
+          label: key[1],
+          labelName: cases.find((c: any) => c.column === key[1] && c.index === parseInt(key.slice(2)))?.name,
+          index: `${key[1]}${parseInt(key.slice(2)) + index}`,
+          page: parseInt(key[0]),
+          value:
+              !outerJson[key] ||
+              outerJson[key].length === 0 ||
+              outerJson[key] === "null"
+                  ? "Non indiqué"
+                  : outerJson[key],
+        })
+      });
 
       await this.prisma.lease.update({
         where: { id: leaseID },
