@@ -202,6 +202,7 @@ export default function AuditsPage() {
         onClose={() => setIsPDFOpen(false)}
         pdfUrl={selectedAudit?.leasePath}
         documentName={selectedAudit?.name}
+        leaseId={selectedAudit?.id}
       />
     </div>
   );
