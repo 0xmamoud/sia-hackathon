@@ -175,6 +175,11 @@ export default function AuditsPage() {
   const [isPDFOpen, setIsPDFOpen] = useState(false)
   const [selectedAudit, setSelectedAudit] = useState(null)
 
+  useEffect(() => {
+
+
+  }, [])
+
 
   const filteredAudits = audits.filter(
     (audit) => audit.name.toLowerCase().includes(nameFilter.toLowerCase()) && audit.date.includes(dateFilter)

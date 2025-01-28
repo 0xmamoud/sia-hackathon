@@ -2,6 +2,7 @@
 import React, { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { Upload, File, X } from 'lucide-react';
 import { Button } from '@/components/ui/button'
+import { API_URL } from '@/lib/constants';
 
 interface FileWithProgress {
   file: File;
@@ -12,6 +13,7 @@ interface FileWithProgress {
 export function FileUploader() {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [files, setFiles] = useState<FileWithProgress[]>([]);
+  const [uploading, setUploading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: DragEvent<HTMLDivElement>): void => {
@@ -86,9 +88,34 @@ export function FileUploader() {
     URL.revokeObjectURL(url);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    console.log('Files uploaded:', files);
+    setUploading(true);
+    const formData = new FormData();
+    files.forEach(fileObj => {
+      formData.append('leasesPdf', fileObj.file);
+    });
+
+    try {
+      const response = await fetch(`${API_URL}/upload`,
+        {
+          method: 'POST',
+          headers: {
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: formData
+        });
+
+      if (response.ok) {
+        const data = await response.json();
+        throw new Error(data.message);
+      }
+
+      setUploading(false);
+    } catch (error) {
+      console.error(error);
+      setUploading(false);
+    }
   };
 
   return (
@@ -145,10 +172,12 @@ export function FileUploader() {
         </div>
         <Button
           className="mt-4 inline-block w-full bg-foreground md:text-lg"
-          disabled={files.length === 0}
+          disabled={files.length === 0 || uploading}
           type="submit"
 
-        >Upload</Button>
+        >
+          {uploading ? 'Analysis in process...' : 'Start Analysis'}
+        </Button>
       </form>
 
       {files.length > 0 && (

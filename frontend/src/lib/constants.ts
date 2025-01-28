@@ -1,5 +1,7 @@
 import { Linkedin, Twitter, Mail, Phone } from "lucide-react"
 
+export const API_URL = 'http://localhost:3001'
+
 export const navLinks = [
   {
     title: "Home",
