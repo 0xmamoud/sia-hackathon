@@ -7,21 +7,25 @@ import koaBody from "koa-body";
 import fs from "fs";
 import { AIProcessService } from "./service/ai.service";
 import serve from "koa-static";
+import cors from "@koa/cors"; // Importez le middleware CORS
 
 const prisma = new PrismaClient();
 const app = new Koa();
 const router = new Router();
 
+// Utilisez le middleware CORS
+app.use(cors());
+
 // Configure koa-body for multipart uploads
 app.use(
-  koaBody({
-    multipart: true,
-    formidable: {
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      uploadDir: "input",
-      keepExtensions: true,
-    },
-  })
+    koaBody({
+      multipart: true,
+      formidable: {
+        maxFileSize: 10 * 1024 * 1024, // 10MB
+        uploadDir: "input",
+        keepExtensions: true,
+      },
+    })
 );
 
 const publicDir = path.join(__dirname, "..", "output");
@@ -44,29 +48,29 @@ router.post("/upload", async (ctx: Context) => {
 
     if (files?.leasesPdfs) {
       const leaseFiles = Array.isArray(files.leasesPdfs)
-        ? files.leasesPdfs
-        : [files.leasesPdfs];
+          ? files.leasesPdfs
+          : [files.leasesPdfs];
       result.leasesPdfs = (leaseFiles as any[])
-        .filter((file: any) => file.mimetype === "application/pdf")
-        .map((file: any) => {
-          leaseFileName.push(file.originalFilename);
-          const newPath = path.join(
-            uploadDir.leases,
-            `lease-${Date.now()}${path.extname(file.originalFilename)}`
-          );
-          fs.renameSync(file.filepath, newPath);
-          return path.basename(newPath);
-        });
+          .filter((file: any) => file.mimetype === "application/pdf")
+          .map((file: any) => {
+            leaseFileName.push(file.originalFilename);
+            const newPath = path.join(
+                uploadDir.leases,
+                `lease-${Date.now()}${path.extname(file.originalFilename)}`
+            );
+            fs.renameSync(file.filepath, newPath);
+            return path.basename(newPath);
+          });
     }
 
     const aiService = new AIProcessService(
-      prisma,
-      `input/audit/audit.pdf`,
-      `input/excel/excel.xlsx`,
-      (result.leasesPdfs as string[]).map(
-        (pdf: string) => `input/lease/${pdf}`
-      ),
-      leaseFileName
+        prisma,
+        `input/audit/audit.pdf`,
+        `input/excel/excel.xlsx`,
+        (result.leasesPdfs as string[]).map(
+            (pdf: string) => `input/lease/${pdf}`
+        ),
+        leaseFileName
     );
 
     ctx.body = {
