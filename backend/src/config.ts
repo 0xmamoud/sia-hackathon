@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export type Label = {
     page: number;
     x: number;
@@ -467,7 +465,7 @@ export const auditCase: AuditCase[] = [
             {
                 page: 2,
                 x: 185,
-                y: 145,
+                y: 120,
                 name: "Existe t-il d'autres mesures d'accompagnement ? (Si oui préciser)",
                 id: "element_48",
                 fontSize: 10,
@@ -1631,13 +1629,13 @@ export const excelCase: ExcelCase[] = [
             {
                 column: "E",
                 index: 2,
-                name: "La destination", //x
+                name: "La destination du bail",
                 page: 0
             },
             {
                 column: "F",
                 index: 2,
-                name: "La désignation", //x
+                name: "La désignation du bail", //x
                 page: 0
             },
             {
@@ -1678,7 +1676,6 @@ export const excelCase: ExcelCase[] = [
                 page: 0
             },
             //LOYER ET GARANTIES
-
             {
                 column: "M",
                 index: 2,
@@ -1721,7 +1718,6 @@ export const excelCase: ExcelCase[] = [
                 name: "Garanties locatives fournies en DR du bail",
                 page: 0
             },
-            //indexation
             {
                 column: "T",
                 index: 2,
@@ -1746,22 +1742,17 @@ export const excelCase: ExcelCase[] = [
                 name: "Clause d'indexation contraire à l'article L. 112-1 du CMF (indice de base fixe / à la hausse / plafond ou plancher)",
                 page: 0
             },
-        ],
-    },
-    {
-        prompt: "Le prompt",
-        cases: [
             {
                 column: "X",
                 index: 2,
-                name: "Crée moi un commentaire pour le bail", //x
-                page: 0 
+                name: "Ici, indique-moi un commentaire à partir des informations du bail, par exemple si le bail suit les normes ou pas.",
+                page: 0
             },
-        ]
+        ],
     },
     //PAGE Refacturation des charges
     {
-        prompt: "Le prompt",
+        prompt: "Specialiste dans la détection de refacturation des charges dans un document de type bail immobilier, vous devez analyser un bail immobilier pour identifier et extraire les informations suivantes (si certaines informations sont absentes ou incomplètes, précisez-le également). ",
         cases: [
             //INFORMATION GÉNÉRALE
             {
@@ -1914,7 +1905,7 @@ export const excelCase: ExcelCase[] = [
     },
     // Page Divers
     {
-        prompt: "Le prompt",
+        prompt: "Specialiste dans la détection de tache divers comme la sous-location les cessions, et les facteurs environnementaux dans un document de type bail immobilier, vous devez analyser un bail immobilier pour identifier et extraire les informations suivantes (si certaines informations sont absentes ou incomplètes, précisez-le également). ",
         cases: [
             {
                 column: "B",
@@ -2015,21 +2006,16 @@ export const excelCase: ExcelCase[] = [
                 index: 2,
                 name: "CLAUSE RESOLUTOIRE", //x
                 page: 2,
-            },       
+            },
+            {
+                column: "X",
+                index: 2,
+                name: "Ici, indique-moi un commentaire à partir des extrait du bail.",
+                page: 0
+            },
         ]
     }, 
     //CLAUSE RESOLUTOIRE
-    {
-        prompt: "Le prompt",
-        cases: [
-            {
-                column: "R",
-                index: 2,
-                name: "Commentaires", //x
-                page: 2,
-            },
-        ]
-    }
 ];
   
 export const metaPrompt = "\n" +
@@ -2045,5 +2031,7 @@ export const metaPrompt = "\n" +
                     "INSTRUCTIONS SUPPLÉMENTAIRES :\n" +
                     "- Ne fournir que le JSON en réponse\n" +
                     "- Aucun texte explicatif\n" +
-                    "- Conserver la structure exacte des clés (A1, B1, C1, D1, E1)\n" +
+                    "- Conserver la structure exacte des clés\n" +
+                    "- Ne m'envoie jamais de tableau de strings, joins les strings avec un saut de ligne\n" +
+                    "- Toujours respecter le format 'clé : valeur extraite'.\n" +
                     "- Assurer la validité du JSON."

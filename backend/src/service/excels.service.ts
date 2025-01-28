@@ -55,7 +55,7 @@ export class ExcelsService {
         const elements = [] as string[];
 
         let element = data.map((category) =>
-            `- ${category.page}${category.column}${category.index}: ${category.name}`
+            `${category.page}${category.column}${category.index}: "${category.name}"`
             ).join("\n");
 
         elements.push(element)
@@ -65,6 +65,7 @@ export class ExcelsService {
 
     async writeExcel(data: IExcelCategory[], path: string, resultPath: string) {
         try {
+            console.log(resultPath)
             const workbook = new ExcelJS.Workbook();
             await workbook.xlsx.readFile(path);
     
@@ -81,6 +82,7 @@ export class ExcelsService {
             }
     
             // Enregistrer les modifications dans le fichier de destination
+            console.log(resultPath);
             await workbook.xlsx.writeFile(resultPath);
             console.log(`Fichier Excel modifié enregistré à ${resultPath}`);
         } catch (error) {

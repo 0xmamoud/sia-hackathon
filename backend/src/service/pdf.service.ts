@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-//@ts-ignore
 import axios from 'axios';
 import FormData from 'form-data';
 import { Label } from '../config';
@@ -66,21 +65,21 @@ export class PDFService {
 
         const pages = pdfDoc.getPages();
 
-        // return pages.map((page) => ({
-        //     page: page,
-        //     label: [
-        //         {
-        //             text: "the variable",
-        //             x: 0,
-        //             y: 0,
-        //         }
-        //     ]
-        // }));
+        return pages.map((page) => ({
+            page: page,
+            label: [
+                {
+                    text: "the variable",
+                    x: 0,
+                    y: 0,
+                }
+            ]
+        }));
     }
 
     createPromptElement(data: Label[]) {
         return data.map((p) => {
-            return `- ${p.id}: ${p.name}`
+            return `${p.id}: ${p.name}`
         }).flat().join("\n");
     }
     
@@ -98,36 +97,43 @@ export class PDFService {
                 return rgb(0, 0, 0);
         }
     }
-    
+
 
     async editAndCopy(inputPath: string, outputPath: string, entries: IEditPDFEntry[]) {
         try {
-            const pdfjsLib = await import("pdfjs-dist");
-            
-            console.log(inputPath)
-            
             const existingPdfBytes = fs.readFileSync(inputPath);
-    
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
     
+            // Utiliser une police qui supporte les caractères spéciaux (optionnel)
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     
             for (const entry of entries) {
                 let { page, text, x, y, color, fontSize } = entry;
                 page++;
-                    
+    
                 if (page < 0 || page >= pdfDoc.getPageCount()) {
                     console.warn(`Page ${page} n'existe pas. Ignorée.`);
                     continue;
                 }
     
                 const pdfPage = pdfDoc.getPages()[page];
-    
                 const maxWidth = pdfPage.getWidth() - x - 50;
                 const lineHeight = fontSize * 1.2;
-                
     
-                const splitTextIntoLines = (text: string, maxWidth: number): string[] => {
+                // Remplacer les sauts de ligne par un espace
+                text = text.replace(/\n/g, ' '); // Remplace tous les \n par un espace
+    
+                // Fonction pour ajuster la taille de la police
+                const adjustFontSize = (text: string, maxWidth: number, initialFontSize: number): number => {
+                    let adjustedFontSize = initialFontSize;
+                    while (font.widthOfTextAtSize(text, adjustedFontSize) > maxWidth && adjustedFontSize > 4) {
+                        adjustedFontSize -= 1;
+                    }
+                    return adjustedFontSize;
+                };
+    
+                // Fonction pour diviser le texte en lignes en fonction de la largeur maximale
+                const splitTextIntoLines = (text: string, maxWidth: number, fontSize: number): string[] => {
                     const words = text.split(' ');
                     const lines: string[] = [];
                     let currentLine = words[0];
@@ -148,14 +154,19 @@ export class PDFService {
                     return lines;
                 };
     
-                let lines = splitTextIntoLines(text, maxWidth);
+                // Ajuster la taille de la police pour le texte
+                fontSize = adjustFontSize(text, maxWidth, fontSize);
     
+                // Diviser le texte en lignes
+                let lines = splitTextIntoLines(text, maxWidth, fontSize);
+    
+                // Calculer la hauteur totale du texte
                 const totalTextHeight = lines.length * lineHeight;
     
-                const startY = y + totalTextHeight - lineHeight;
+                // Commencer à écrire à partir de la position Y donnée
+                let currentY = y + totalTextHeight - lineHeight;
     
-                let currentY = startY;
-                
+                // Dessiner chaque ligne
                 for (const line of lines) {
                     pdfPage.drawText(line, {
                         x: x,
@@ -164,10 +175,11 @@ export class PDFService {
                         font: font,
                         color: this.getColor(color),
                     });
-                    currentY -= lineHeight;
+                    currentY -= lineHeight; // Déplacer vers le bas pour la prochaine ligne
                 }
             }
     
+            // Sauvegarder le PDF modifié
             const modifiedPdfBytes = await pdfDoc.save();
             fs.writeFileSync(outputPath, modifiedPdfBytes);
     
@@ -175,7 +187,6 @@ export class PDFService {
             console.error("Erreur lors de la modification du PDF :", err);
         }
     }
-
 
     async extractTextWithCoordinates(inputPath: string) {
         try {
