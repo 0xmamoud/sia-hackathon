@@ -3,68 +3,31 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, Download, BarChart, FileText, X } from "lucide-react";
+import { Eye, BarChart, FileText, Sheet } from "lucide-react";
 import { FileUploader } from "@/components/forms/fileUpload";
 import { PDFViewer } from "@/components/sections/pdfViewer";
 import { API_URL } from "@/lib/constants";
 
-const initialAudits = [
-  {
-    id: 1,
-    name: "Office Lease 2023",
-    date: "2023-06-15",
-    summary: "Annual office lease review for headquarters.",
-    pdfUrl: "/sample.pdf",
-  },
-  {
-    id: 2,
-    name: "Retail Space Agreement",
-    date: "2023-07-22",
-    summary: "New retail space lease in downtown location.",
-    pdfUrl: "/sample.pdf",
-  },
-];
-
 export default function DashboardPage() {
-  const [audits, setAudits] = useState(initialAudits);
+  const [audits, setAudits] = useState([]);
   const [isPDFOpen, setIsPDFOpen] = useState(false);
   const [selectedAudit, setSelectedAudit] = useState(null);
-
-  const handleUploadSuccess = (data: any) => {
-    const newAudit = {
-      id: audits.length + 1,
-      name: `Processed Lease ${data.files.processId}`,
-      date: new Date().toISOString(),
-      summary: "Processed lease files",
-      pdfUrl: data.files.leases[0], // Use the first PDF lease URL
-      excelUrl: data.files.excel, // Add Excel URL
-    };
-    setAudits((prevAudits) => [newAudit, ...prevAudits]);
-  };
 
   const handleViewAudit = (audit) => {
     setSelectedAudit(audit);
     setIsPDFOpen(true);
   };
 
-  const handleClosePDF = () => {
-    setIsPDFOpen(false);
-  };
 
   const handleDownloadAudit = (audit) => {
-    if (audit.pdfUrl) {
-      const link = document.createElement("a");
-      link.href = audit.pdfUrl;
-      link.target = "_blank";
-      link.download = audit.name + ".pdf";
-      link.click();
-    } else if (audit.excelUrl) {
-      const link = document.createElement("a");
-      link.href = audit.excelUrl;
-      link.target = "_blank";
-      link.download = audit.name + ".xlsx";
-      link.click();
-    }
+    const link = document.createElement("a");
+    link.href = audit.excelPath;
+    link.download = audit.name + ".xlsx";
+    link.click();
+  };
+
+  const updateAudits = (data) => {
+    setAudits((prevAudits) => [...prevAudits, ...data]);
   };
 
   useEffect(() => {
@@ -76,7 +39,6 @@ export default function DashboardPage() {
           throw new Error(data.message);
         }
         setAudits(data);
-        console.log(data);
       } catch (error) {
         console.error(error);
       }
@@ -124,7 +86,23 @@ export default function DashboardPage() {
             <CardTitle>Upload New Lease</CardTitle>
           </CardHeader>
           <CardContent>
-            <FileUploader onUploadSuccess={handleUploadSuccess} />
+            <FileUploader updateAudits={updateAudits} />
+          </CardContent>
+        </Card>
+        <Card className="w-fit">
+          <CardHeader>
+            <CardTitle>Upload Audit Template</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FileUploader updateAudits={updateAudits} />
+          </CardContent>
+        </Card>
+        <Card className="w-fit">
+          <CardHeader>
+            <CardTitle>Upload Excel Template</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FileUploader updateAudits={updateAudits} />
           </CardContent>
         </Card>
       </div>
@@ -145,8 +123,8 @@ export default function DashboardPage() {
             <TableBody>
               {audits.sort(
                 (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-              ).slice(0, 5).map((audit) => (
-                <TableRow key={audit.id}>
+              ).slice(0, 5).map((audit, index) => (
+                <TableRow key={index}>
                   <TableCell className="font-medium">{audit.name}</TableCell>
                   <TableCell>{new Date(audit.date).toLocaleDateString()}</TableCell>
                   <TableCell>
@@ -157,15 +135,15 @@ export default function DashboardPage() {
                         onClick={() => handleViewAudit(audit)}
                       >
                         <Eye className="w-4 h-4 mr-1" />
-                        View
+                        Audit
                       </Button>
                       <Button
                         className="bg-foreground"
                         size="sm"
                         onClick={() => handleDownloadAudit(audit)}
                       >
-                        <Download className="w-4 h-4 mr-1" />
-                        Download
+                        <Sheet className="w-4 h-4 mr-1" />
+                        Excel
                       </Button>
                     </div>
                   </TableCell>
@@ -178,8 +156,8 @@ export default function DashboardPage() {
 
       <PDFViewer
         isOpen={isPDFOpen}
-        onClose={handleClosePDF}
-        pdfUrl={selectedAudit?.pdfUrl}
+        onClose={() => setIsPDFOpen(false)}
+        pdfUrl={selectedAudit?.leasePath}
         documentName={selectedAudit?.name}
       />
     </div>

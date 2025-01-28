@@ -2,6 +2,8 @@
 import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { Upload, File, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { API_URL } from "@/lib/constants";
 
 interface FileWithProgress {
@@ -10,14 +12,15 @@ interface FileWithProgress {
   status: "pending" | "completed";
 }
 
-interface FileUploaderProps {
-  onUploadSuccess: (data: any) => void; // Callback to pass response data to parent
+interface AuditHandler {
+  updateAudits: (data: any) => void;
 }
 
-export function FileUploader({ onUploadSuccess }: FileUploaderProps) {
+export function FileUploader({ updateAudits }: AuditHandler) {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [files, setFiles] = useState<FileWithProgress[]>([]);
   const [uploading, setUploading] = useState<boolean>(false);
+  const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: DragEvent<HTMLDivElement>): void => {
@@ -102,13 +105,20 @@ export function FileUploader({ onUploadSuccess }: FileUploaderProps) {
       });
 
       const data = await response.json();
+      console.log(data.files.leases);
+
       if (!response.ok) {
         throw new Error(data.message);
       }
 
-      console.log(data);
       setUploading(false);
-      onUploadSuccess(data); // Pass the response data to the parent component
+      updateAudits(data.files.leases);
+      toast({
+        title: "Upload Successful",
+        description: "Your files have been uploaded successfully",
+        className: "bg-green-500",
+      })
+
     } catch (error) {
       console.error(error);
       setUploading(false);
@@ -209,6 +219,8 @@ export function FileUploader({ onUploadSuccess }: FileUploaderProps) {
           ))}
         </div>
       )}
+
+      <Toaster />
     </section>
   );
 }
