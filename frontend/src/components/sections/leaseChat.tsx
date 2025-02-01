@@ -20,12 +20,11 @@ export function LeaseChat({ leaseId }: { leaseId: number }) {
   
   useEffect(() => {
       const getResponse = async () => {
-        if (messages[messages.length - 1].sender === "response") return;
-        console.log(leaseId)
+        if (messages[messages.length - 1]?.sender === "response" || !messages[messages.length - 1]) return;
         try {
          const response = await fetch(`${API_URL}/chat/${leaseId}`, {
           method: "POST",
-          body: JSON.stringify({ message: newMessage }),
+          body: JSON.stringify({ message: messages[messages.length - 1].text }),
           headers: {
            "Content-Type": "application/json",
           },
@@ -34,10 +33,9 @@ export function LeaseChat({ leaseId }: { leaseId: number }) {
         if (response.ok) {
           
           const data = await response.json()
-          console.log(data)
           const responseMessage: Message = {
             id: messages.length + 1,
-            text: data.message,
+            text: data.response,
             timestamp: new Date(),
             sender: "response",
           }
@@ -75,7 +73,7 @@ export function LeaseChat({ leaseId }: { leaseId: number }) {
   }
 
   return (
-    <div className="h-[97%] w-[350px] flex flex-col border-l text-lg font-inter">
+    <div className="h-[97%] w-[500px] flex flex-col border-l text-lg font-inter">
       <div className="p-4 border-b">
         <h2 className="text-xl font-semibold">Chat</h2>
       </div>

@@ -182,7 +182,6 @@ router.post("/chat/:id", async (ctx: Context) => {
     return;
   }
   
-
   const command = new ConverseCommand({
         modelId: process.env.AWS_MODEL_ID,
         messages: [{
@@ -193,10 +192,10 @@ router.post("/chat/:id", async (ctx: Context) => {
         }] as ConverseCommandInput["messages"],
         system: [
           {
-            text: `Analyse la question suivante en tant qu'expert en droit des baux et avocat spécialisé. Si la question concerne l'analyse d'un bail, réponds directement à l'utilisateur. Sinon, indique que la demande n'a aucun rapport avec l'analyse de baux: "${message}"`,
+            text: `Répond a la question suivante en tant qu'expert en droit des baux et avocat spécialisé. Si la question concerne l'analyse d'un bail, réponds directement à l'utilisateur. Sinon, indique que la demande n'a aucun rapport avec l'analyse de baux: "${message}"`,
           }
         ],
-        inferenceConfig: { maxTokens: 8192, temperature: 0.5, topP: 0.9 },
+        inferenceConfig: { maxTokens: 50000, temperature: 0.5, topP: 0.9 },
     });
   
   const response = await client.send(command);   

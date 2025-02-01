@@ -159,6 +159,7 @@ export default function DashboardPage() {
         onClose={() => setIsPDFOpen(false)}
         pdfUrl={selectedAudit?.leasePath}
         documentName={selectedAudit?.name}
+        leaseId={selectedAudit?.id}
       />
     </div>
   );

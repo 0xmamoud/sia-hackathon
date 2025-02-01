@@ -26,11 +26,18 @@ export interface IEditPDFEntry {
 
 export class PDFService {
 
-    async toMd(path: string) {
-        // if (process.env.NODE_ENV === "development") {
-            const result = fs.readFileSync("input/md/1.md", "utf-8");
-            return result;
-        // }
+    async toMd(path: string, leaseFileName: string) {
+        if (process.env.NODE_ENV === "development") {
+            if (fs.existsSync(`input/md/${leaseFileName}.md`)) {
+                return fs.readFileSync(`input/md/${leaseFileName}.md`, "utf-8");
+            }
+        }
+        
+        console.log(leaseFileName)
+        
+        if (fs.existsSync(`input/md/${leaseFileName}.md`)) {
+            return fs.readFileSync(`input/md/${leaseFileName}.md`, "utf-8");
+        }
 
         try {
             const formData = new FormData();
@@ -46,7 +53,7 @@ export class PDFService {
                 },
             });
 
-            fs.writeFileSync(`output/md/${path.split('/').pop()?.split(".")[0]}.md`, response.data.markdown_content);
+            fs.writeFileSync(`input/md/${leaseFileName}.md`, response.data.markdown_content);
 
             return response.data.markdown_content;
         } catch (error) {

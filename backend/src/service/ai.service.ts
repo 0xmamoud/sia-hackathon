@@ -103,7 +103,7 @@ export class AIProcessService {
       modelId: process.env.AWS_MODEL_ID,
       messages: [prompt[1]],
       system: [prompt[0]?.content[0]],
-      inferenceConfig: { maxTokens: 8192, temperature: 0.5, topP: 0.9 },
+      inferenceConfig: { maximumLength: 50000, maxTokens: 50000, temperature: 0.5, topP: 0.9 },
   });
 
     const response = await client.send(command);   
@@ -151,9 +151,13 @@ export class AIProcessService {
       await this.callToAgent(message);
       let response;
       if (process.env.NODE_ENV === "development")
-        response = await fsp.readFile(`trash/excel-${excelScan.indexOf(use_case)}.json`, 'utf8');
-      else
-        response = (await this.callToAgent(message)) as any;
+        response = await fsp.readFile(`cache/excel-${excelScan.indexOf(use_case)}-${this.leaseFileName[index]}.json`, 'utf8');
+      else {
+        if (fs.existsSync(`cache/excel-${excelScan.indexOf(use_case)}-${this.leaseFileName[index]}.json`)) {
+          response = await fsp.readFile(`cache/excel-${excelScan.indexOf(use_case)}-${this.leaseFileName[index]}.json`, 'utf8');
+        } else
+          response = (await this.callToAgent(message)) as any;
+      }
 
 
       let outerJson = JSON.parse(response);
@@ -176,6 +180,9 @@ export class AIProcessService {
                   : outerJson[key],
         })
       });
+      
+      if (!fs.existsSync(`cache/excel-${excelScan.indexOf(use_case)}-${this.leaseFileName[index]}.json`))
+        fs.writeFileSync(`cache/excel-${excelScan.indexOf(use_case)}-${this.leaseFileName[index]}.json`, response);
 
       await this.prisma.lease.update({
         where: { id: leaseID },
@@ -225,12 +232,12 @@ export class AIProcessService {
       ] as ConverseCommandInput["messages"];
 
       let response;
-      if (process.env.NODE_ENV === "development")
-        response = await fsp.readFile(`trash/1-${auditScan.indexOf(use_case)}.json`, 'utf8');
+      
+      if (fs.existsSync(`cache/audit-${auditCase.indexOf(use_case)}-${this.leaseFileName[index]}.json`))
+        response = await fsp.readFile(`cache/audit-${auditCase.indexOf(use_case)}-${this.leaseFileName[index]}.json`, 'utf8');
       else
-        response = (await this.callToAgent(message)) as any;
-
-      // console.log(response);
+        response = await this.callToAgent(message) as any;
+     
       
       console.log(response)
 
@@ -260,6 +267,10 @@ export class AIProcessService {
         .flat(Infinity) as IEditPDFEntry[];
 
       auditEntriesPDF.push(...entries);
+      
+          
+      if (!fs.existsSync(`cache/audit-${auditCase.indexOf(use_case)}-${this.leaseFileName[index]}.json`))
+        fs.writeFileSync(`cache/audit-${auditCase.indexOf(use_case)}-${this.leaseFileName[index]}.json`, response);
     }
 
     await this.prisma.lease.update({
@@ -282,7 +293,7 @@ export class AIProcessService {
     excelScan: any,
     auditScan: any
   ) {
-    const leasePDFtoMD = await this.pdfService.toMd(leasePath);
+    const leasePDFtoMD = await this.pdfService.toMd(leasePath, this.leaseFileName[this.leasesPath.indexOf(leasePath)].split(".")[0]);
     
     await this.prisma.lease.update({
       where: { id: leaseID },
