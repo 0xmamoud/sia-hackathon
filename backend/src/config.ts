@@ -2023,7 +2023,8 @@ export const metaPrompt = "\n" +
                     `[format]` +
                     "\n" +
                     "RÈGLES D'EXTRACTION :\n" +
-                    "- Si l'information est absente : utiliser null\n" +
+                    "- Ne m'envoie jamais de tableau, joins les chaînes de caractères avec des sauts de ligne\n" +
+                    "- Si l'information est absente : utiliser 'Aucune information'\n" +
                     "- Pour les dates : format JJ/MM/AAAA\n" +
                     "- Pour les adresses : inclure numéro, rue, code postal, ville\n" +
                     "- Pour les noms : inclure la forme juridique si présente\n" +
@@ -2032,6 +2033,5 @@ export const metaPrompt = "\n" +
                     "- Ne fournir que le JSON en réponse\n" +
                     "- Aucun texte explicatif\n" +
                     "- Conserver la structure exacte des clés\n" +
-                    "- Ne m'envoie jamais de tableau de strings, joins les strings avec un saut de ligne\n" +
                     "- Toujours respecter le format 'clé : valeur extraite'.\n" +
                     "- Assurer la validité du JSON."

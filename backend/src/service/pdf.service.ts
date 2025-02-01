@@ -4,7 +4,6 @@ import axios from 'axios';
 import FormData from 'form-data';
 import { Label } from '../config';
 
-
 interface IPDFLabel {
     name: string,
     x: number,
@@ -28,8 +27,10 @@ export interface IEditPDFEntry {
 export class PDFService {
 
     async toMd(path: string) {
-        const result = fs.readFileSync("input/md/1.md", "utf-8");
-        return result;
+        // if (process.env.NODE_ENV === "development") {
+            const result = fs.readFileSync("input/md/1.md", "utf-8");
+            return result;
+        // }
 
         try {
             const formData = new FormData();
@@ -39,7 +40,7 @@ export class PDFService {
                 contentType: 'application/octet-stream',
             });
 
-            const response = await axios.post('http://127.0.0.1:8000/run-process/', formData, {
+            const response = await axios.post(`${process.env.PDF_TO_MD_API_PATH}`, formData, {
                 headers: {
                     ...formData.getHeaders(),
                 },
@@ -154,19 +155,14 @@ export class PDFService {
                     return lines;
                 };
     
-                // Ajuster la taille de la police pour le texte
                 fontSize = adjustFontSize(text, maxWidth, fontSize);
     
-                // Diviser le texte en lignes
                 let lines = splitTextIntoLines(text, maxWidth, fontSize);
     
-                // Calculer la hauteur totale du texte
                 const totalTextHeight = lines.length * lineHeight;
     
-                // Commencer à écrire à partir de la position Y donnée
                 let currentY = y + totalTextHeight - lineHeight;
     
-                // Dessiner chaque ligne
                 for (const line of lines) {
                     pdfPage.drawText(line, {
                         x: x,
@@ -175,11 +171,10 @@ export class PDFService {
                         font: font,
                         color: this.getColor(color),
                     });
-                    currentY -= lineHeight; // Déplacer vers le bas pour la prochaine ligne
+                    currentY -= lineHeight;
                 }
             }
     
-            // Sauvegarder le PDF modifié
             const modifiedPdfBytes = await pdfDoc.save();
             fs.writeFileSync(outputPath, modifiedPdfBytes);
     

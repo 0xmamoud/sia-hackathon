@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SendHorizonal } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { API_URL } from "@/lib/constants"
 
 interface Message {
   id: number
@@ -16,8 +17,49 @@ interface Message {
 export function LeaseChat({ leaseId }: { leaseId: number }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
+  
+  useEffect(() => {
+      const getResponse = async () => {
+        if (messages[messages.length - 1].sender === "response") return;
+        console.log(leaseId)
+        try {
+         const response = await fetch(`${API_URL}/chat/${leaseId}`, {
+          method: "POST",
+          body: JSON.stringify({ message: newMessage }),
+          headers: {
+           "Content-Type": "application/json",
+          },
+        })
+        
+        if (response.ok) {
+          
+          const data = await response.json()
+          console.log(data)
+          const responseMessage: Message = {
+            id: messages.length + 1,
+            text: data.message,
+            timestamp: new Date(),
+            sender: "response",
+          }
+          setMessages((prev) => [...prev, responseMessage])
+        } else {
+          const responseMessage: Message = {
+            id: messages.length + 1,
+            text: "An error occurred",
+            timestamp: new Date(),
+            sender: "response",
+          }
+          setMessages((prev) => [...prev, responseMessage])
+        } 
+        } catch (error) {
+          console.error(error)
+        }
+        
+      }
+      getResponse();
+  }, [messages])
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (newMessage.trim()) {
       const userMessage: Message = {
         id: messages.length + 1,
@@ -28,21 +70,12 @@ export function LeaseChat({ leaseId }: { leaseId: number }) {
 
       setMessages((prev) => [...prev, userMessage])
       setNewMessage("")
-
-      setTimeout(() => {
-        const responseMessage: Message = {
-          id: messages.length + 2,
-          text: `This is a response to "${newMessage}"`,
-          timestamp: new Date(),
-          sender: "response",
-        }
-        setMessages((prev) => [...prev, responseMessage])
-      }, 1000)
+      
     }
   }
 
   return (
-    <div className="h-[97%] w-[500px] flex flex-col border-l text-lg font-inter">
+    <div className="h-[97%] w-[350px] flex flex-col border-l text-lg font-inter">
       <div className="p-4 border-b">
         <h2 className="text-xl font-semibold">Chat</h2>
       </div>

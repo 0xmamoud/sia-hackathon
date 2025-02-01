@@ -7,16 +7,24 @@ import koaBody from "koa-body";
 import fs from "fs";
 import { AIProcessService } from "./service/ai.service";
 import serve from "koa-static";
-import cors from "@koa/cors"; // Importez le middleware CORS
+import cors from "@koa/cors";
+import {
+  BedrockRuntimeClient,
+  ConverseCommand,
+  ConverseCommandInput,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+
+const client = new BedrockRuntimeClient({ 
+  region: "us-west-2",
+});
 
 const prisma = new PrismaClient();
 const app = new Koa();
 const router = new Router();
 
-// Utilisez le middleware CORS
 app.use(cors());
 
-// Configure koa-body for multipart uploads
 app.use(
     koaBody({
       multipart: true,
@@ -78,6 +86,7 @@ router.post("/upload", async (ctx: Context) => {
       files: await aiService.start(),
     };
   } catch (error) {
+    console.log(error);
     ctx.status = 500;
     ctx.body = {
       error: "Upload failed",
@@ -138,10 +147,12 @@ router.get("/leases", async (ctx: Context) => {
       id: true,
     },
   });
+  
+  if (!leases || leases.length === 0) {
+    ctx.body = [];
+    return;
+  }
 
-  leases.forEach((lease) => {
-    console.log((lease.datasourceExcel as any).slice(0, 5));
-  });
 
   ctx.body = leases.map((lease) => ({
     id: lease.id,
@@ -151,8 +162,53 @@ router.get("/leases", async (ctx: Context) => {
     excelTemplatePath: `http://localhost:3001/input/excel/${lease.templateExcelPath.split("/").pop()}`,
     excelPath: `http://localhost:3001/output/${lease.processId}.xlsx`,
     leasePath: `http://localhost:3001/output/${lease.id}.pdf`,
-    synthesise: (lease.datasourceExcel as any).slice(0, 5).map((data: any) => ({key: data.labelName, value: data.value})),
+    synthesise: (lease.datasourceExcel as any)?.slice(0, 5).map((data: any) => ({key: data.labelName, value: data.value})) ?? [],
   }));
+});
+
+router.post("/chat/:id", async (ctx: Context) => {
+  const { id } = ctx.params;
+  const { message } = ctx.request.body;
+
+  const lease = await prisma.lease.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+  });
+
+  if (!lease) {
+    ctx.status = 404;
+    ctx.body = { error: "Lease not found" };
+    return;
+  }
+  
+
+  const command = new ConverseCommand({
+        modelId: process.env.AWS_MODEL_ID,
+        messages: [{
+          role: "user",
+          content: [{
+            text: lease.docResume,
+          }],
+        }] as ConverseCommandInput["messages"],
+        system: [
+          {
+            text: `Analyse la question suivante en tant qu'expert en droit des baux et avocat spécialisé. Si la question concerne l'analyse d'un bail, réponds directement à l'utilisateur. Sinon, indique que la demande n'a aucun rapport avec l'analyse de baux: "${message}"`,
+          }
+        ],
+        inferenceConfig: { maxTokens: 8192, temperature: 0.5, topP: 0.9 },
+    });
+  
+  const response = await client.send(command);   
+  
+  if (!response) throw new Error("Pas de réponse de l'API");
+      
+  const responseText = response.output?.message?.content?.[0]?.text ?? "No response";
+  
+  
+  ctx.body = {
+    response: responseText,
+  };
 });
 
 app.use(router.routes());

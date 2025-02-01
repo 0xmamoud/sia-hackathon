@@ -18,6 +18,7 @@
     "koa-body": "^6.0.1",
     "koa-static": "^5.0.0",
     "mammoth": "^1.9.0",
+    "node-fetch": "^3.3.2",
     "officeparser": "^5.1.1",
     "openai": "^4.79.1",
     "pdf-lib": "^1.17.1",

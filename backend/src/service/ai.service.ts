@@ -14,8 +14,15 @@ import { PrismaClient } from "@prisma/client";
 import { userInfo } from "os";
 import { promises as fsp } from "fs";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+import {
+  BedrockRuntimeClient,
+  ConverseCommand,
+  ConverseCommandInput,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+
+const client = new BedrockRuntimeClient({ 
+  region: "us-west-2",
 });
 
 export class AIProcessService {
@@ -57,7 +64,7 @@ export class AIProcessService {
     this.auditTemplatePath = auditTemplatePath;
     this.excelsTemplatePath = excelsTemplatePath;
     this.leasesPath = leasesPath;
-    this.ID = "H3RDC0DE"; //Math.random().toString(36).substring(7);
+    this.ID = "12DE3"; //Math.random().toString(36).substring(7);
   }
 
   private async storeResultsAudit(fileId: string, datasourceAudit: any) {
@@ -89,20 +96,24 @@ export class AIProcessService {
   }
 
   private async callToAgent(
-    prompt: { role: "system" | "user"; content: string }[]
+    prompt: ConverseCommandInput["messages"]
   ) {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: prompt,
-      response_format: { type: "json_object" },
-      temperature: 0.3,
-    });
+    
+    const command = new ConverseCommand({
+      modelId: process.env.AWS_MODEL_ID,
+      messages: [prompt[1]],
+      system: [prompt[0]?.content[0]],
+      inferenceConfig: { maxTokens: 8192, temperature: 0.5, topP: 0.9 },
+  });
 
-    const response = completion.choices[0]?.message?.content;
+    const response = await client.send(command);   
 
     if (!response) throw new Error("Pas de réponse de l'API");
+    
+    const responseText = response.output?.message?.content?.[0]?.text ?? "No response";
 
-    return response;
+
+    return responseText;
   }
 
   private async leaseGetExcel(
@@ -117,32 +128,36 @@ export class AIProcessService {
 
       const message = [
         {
-          role: "system",
-          content:
-            prompt +
-            metaPrompt.replaceAll(
-              "[format]",
-              this.excelsService.createPromptElement(cases)
-            ),
+          role: "assistant",
+          content:[
+            {
+              text: `${ 
+                prompt +
+                metaPrompt.replaceAll(
+                  "[format]",
+                  this.excelsService.createPromptElement(cases)
+                )}`
+            }
+          ],
         },
         {
           role: "user",
-          content: lease,
+          content: [{
+            text: lease,
+          }],
         },
-      ] as { role: "system" | "user"; content: string }[];
+      ] as ConverseCommandInput["messages"];
 
-      //const response = (await this.callToAgent(message)) as any;
+      await this.callToAgent(message);
+      let response;
+      if (process.env.NODE_ENV === "development")
+        response = await fsp.readFile(`trash/excel-${excelScan.indexOf(use_case)}.json`, 'utf8');
+      else
+        response = (await this.callToAgent(message)) as any;
 
-      //console.log(response);
-
-      // const response = Object.assign({}, ...cases.map((c) => ({
-      //     [`${c.page}${c.column}${c.index}`]: c.name
-      // })))
-
-      const response = await fsp.readFile(`trash/excel-${excelScan.indexOf(use_case)}.json`, 'utf8');
 
       let outerJson = JSON.parse(response);
-
+      
       if (typeof outerJson === "string") {
         outerJson = JSON.parse(outerJson);
       }
@@ -187,24 +202,37 @@ export class AIProcessService {
 
       const message = [
         {
-          role: "system",
-          content:
-            prompt +
-            metaPrompt.replaceAll(
-              "[format]",
-              this.pdfService.createPromptElement(labels)
-            ),
+          role: "assistant",
+          content: [
+            {
+              text: 
+              `${prompt +
+              metaPrompt.replaceAll(
+                "[format]",
+                this.pdfService.createPromptElement(labels)
+              )}`
+            }
+          ],
         },
         {
           role: "user",
-          content: lease,
+          content: [
+            {
+              text: lease,
+            }
+          ],
         },
-      ] as { role: "system" | "user"; content: string }[];
+      ] as ConverseCommandInput["messages"];
 
-      //const response = (await this.callToAgent(message)) as any;
-      const response = await fsp.readFile(`trash/${index}-${auditScan.indexOf(use_case)}.json`, 'utf8');
+      let response;
+      if (process.env.NODE_ENV === "development")
+        response = await fsp.readFile(`trash/1-${auditScan.indexOf(use_case)}.json`, 'utf8');
+      else
+        response = (await this.callToAgent(message)) as any;
 
-      console.log(response);
+      // console.log(response);
+      
+      console.log(response)
 
       let outerJson = JSON.parse(response);
 
@@ -231,14 +259,6 @@ export class AIProcessService {
         })
         .flat(Infinity) as IEditPDFEntry[];
 
-      // fs.writeFile(`${index}-${auditScan.indexOf(use_case)}.json`, JSON.stringify(response, null, 2), (err) => {
-      //     if (err) {
-      //         console.error('Erreur lors de la création du fichier JSON :', err);
-      //     } else {
-      //         console.log(`Fichier JSON créé avec succès : ${index}`);
-      //     }
-      // });
-
       auditEntriesPDF.push(...entries);
     }
 
@@ -263,6 +283,13 @@ export class AIProcessService {
     auditScan: any
   ) {
     const leasePDFtoMD = await this.pdfService.toMd(leasePath);
+    
+    await this.prisma.lease.update({
+      where: { id: leaseID },
+      data: {
+        docResume: leasePDFtoMD,
+      },
+    });
 
     await this.leaseGetAudit(
       leaseID,
