@@ -34,7 +34,7 @@ Leaz utilise **Docling** pour l'analyse des documents et **Mistral AI** pour l'e
 
 - Node.js (version 20 ou supérieure)
 - Python (version 3.8 ou supérieure)
-- npm ou yarn
+- Bun
 
 ### Étapes d'Installation
 
